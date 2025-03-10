@@ -2,21 +2,319 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
-  output          = "../generated/client"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider     = "postgresql"
-  url          = env("DATABASE_URL")
-  directUrl    = env("DIRECT_URL")
-  relationMode = "prisma"
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-// This is a stub model.
-// Delete it and add your own Prisma models.
-model Page {
-  id   Int    @id @default(autoincrement())
-  name String
+model Organiser {
+  id                 String             @id // Supabase UUID
+  stripeCustomerId   String?            @unique @map("stripe_customer_id")
+  name               String
+  slug               String             @unique
+  type               OrgType
+  description        String?
+  logo               String?
+  website            String?
+  facebook           String?
+  twitter            String?
+  instagram          String?
+  email              String
+  phone              String?
+  address            String?
+  accountName        String?            @map("account_name")
+  accountNumber      String?            @map("account_number")
+  bankName           String?            @map("bank_name")
+  routingNumber      String?            @map("routing_number")
+  verificationStatus VerificationStatus @map("verification_status")
+  payoutFrequency    PayoutFrequency    @map("payout_frequency")
+  commissionRate     Decimal            @map("commission_rate")
+  emailNotifications Boolean            @map("email_notifications")
+  smsNotifications   Boolean            @map("sms_notifications")
+  pushNotifications  Boolean            @map("push_notifications")
+  events             Event[]
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+
+  @@map("organiser")
+}
+
+model Venue {
+  id             BigInt   @id @default(autoincrement())
+  name           String
+  slug           String   @unique
+  description    String?
+  address        String?
+  city           String?
+  state          String?
+  country        String?
+  postalCode     String?  @map("postal_code")
+  latitude       Decimal?
+  longitude      Decimal?
+  totalCapacity  Int?     @map("total_capacity")
+  amenities      String[]
+  parking        Boolean?
+  accessibility  Boolean?
+  food           Boolean?
+  drinks         Boolean?
+  images         String[]
+  ageRestriction Int?     @map("age_restriction")
+  dresscode      String?
+  customRules    String[] @map("custom_rules")
+  events         Event[]
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("venue")
+}
+
+model Customer {
+  id                 String       @id // Supabase UUID
+  stripeCustomerId   String?      @unique @map("stripe_customer_id")
+  type               CustomerType
+  firstName          String       @map("first_name")
+  lastName           String       @map("last_name")
+  email              String
+  phone              String?
+  dateOfBirth        DateTime?    @map("date_of_birth")
+  eventTypes         String[]     @map("event_types")
+  emailNotifications Boolean      @map("email_notifications")
+  smsNotifications   Boolean      @map("sms_notifications")
+  pushNotifications  Boolean      @map("push_notifications")
+  lastLogin          DateTime?    @updatedAt @map("last_login")
+  balance            Decimal
+  orders             Order[]
+  carts              Cart[]
+  createdAt          DateTime     @default(now()) @map("created_at")
+  updatedAt          DateTime     @updatedAt @map("updated_at")
+
+  @@map("customer")
+}
+
+model Event {
+  id                 BigInt       @id @default(autoincrement())
+  organizerId        String       @map("organizer_id") // Changed to String for Supabase UUID
+  venueId            BigInt       @map("venue_id")
+  title              String
+  slug               String       @unique
+  description        String?
+  category           String[]
+  startTime          DateTime     @map("start_time")
+  endTime            DateTime     @map("end_time")
+  doorsOpen          DateTime     @map("doors_open")
+  status             EventStatus
+  isPublic           Boolean      @map("is_public")
+  requiresApproval   Boolean      @map("requires_approval")
+  waitingListEnabled Boolean      @map("waiting_list_enabled")
+  refundPolicy       String?      @map("refund_policy")
+  organiser          Organiser    @relation(fields: [organizerId], references: [id])
+  venue              Venue        @relation(fields: [venueId], references: [id])
+  tickets            Ticket[]
+  ticketTypes        TicketType[]
+  createdAt          DateTime     @default(now()) @map("created_at")
+  updatedAt          DateTime     @updatedAt @map("updated_at")
+  eventDates         EventDate[]
+
+  @@index([organizerId])
+  @@map("event")
+}
+
+model EventDate {
+  id        BigInt     @id @default(autoincrement())
+  eventId   BigInt     @map("event_id")
+  date      DateTime // The specific date
+  event     Event      @relation(fields: [eventId], references: [id])
+  timeSlots TimeSlot[] // Relation to time slots
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+
+  @@index([eventId])
+  @@map("event_date")
+}
+
+model TimeSlot {
+  id          BigInt      @id @default(autoincrement())
+  eventDateId BigInt      @map("event_date_id")
+  startTime   DateTime    @map("start_time")
+  endTime     DateTime    @map("end_time")
+  doorsOpen   DateTime    @map("doors_open")
+  eventDate   EventDate   @relation(fields: [eventDateId], references: [id])
+  tickets     Ticket[]
+  inventory   Inventory[] // New relation for managing capacity per time slot
+  cartItems   CartItem[] // New relation for cart items
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  @@index([eventDateId])
+  @@map("time_slot")
+}
+
+model TicketType {
+  id            BigInt      @id @default(autoincrement())
+  eventId       BigInt      @map("event_id")
+  name          String // e.g., "Regular", "VIP"
+  description   String?
+  price         Decimal
+  maxPerOrder   Int         @map("max_per_order")
+  minPerOrder   Int         @map("min_per_order")
+  saleStartTime DateTime    @map("sale_start_time")
+  saleEndTime   DateTime    @map("sale_end_time")
+  event         Event       @relation(fields: [eventId], references: [id])
+  inventory     Inventory[] // New relation
+  tickets       Ticket[]
+  cartItems     CartItem[] // New relation for cart items
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  @@index([eventId])
+  @@map("ticket_type")
+}
+
+// New model for managing inventory per time slot and ticket type
+model Inventory {
+  id           BigInt     @id @default(autoincrement())
+  timeSlotId   BigInt     @map("time_slot_id")
+  ticketTypeId BigInt     @map("ticket_type_id")
+  quantity     Int // Available quantity for this combination
+  timeSlot     TimeSlot   @relation(fields: [timeSlotId], references: [id])
+  ticketType   TicketType @relation(fields: [ticketTypeId], references: [id])
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  @@unique([timeSlotId, ticketTypeId])
+  @@index([timeSlotId])
+  @@index([ticketTypeId])
+  @@map("inventory")
+}
+
+model Ticket {
+  id           BigInt       @id @default(autoincrement())
+  timeSlotId   BigInt       @map("time_slot_id") // New field
+  ticketTypeId BigInt       @map("ticket_type_id")
+  orderId      BigInt?      @map("order_id")
+  status       TicketStatus
+  purchaseDate DateTime?    @map("purchase_date")
+  ownerName    String?      @map("owner_name")
+  ownerEmail   String?      @map("owner_email")
+  ownerPhone   String?      @map("owner_phone")
+  qrCode       String       @map("qr_code")
+  timeSlot     TimeSlot     @relation(fields: [timeSlotId], references: [id])
+  ticketType   TicketType   @relation(fields: [ticketTypeId], references: [id])
+  order        Order?       @relation(fields: [orderId], references: [id])
+  event        Event?       @relation(fields: [eventId], references: [id])
+  eventId      BigInt?
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  @@index([timeSlotId])
+  @@index([ticketTypeId])
+  @@index([orderId])
+  @@map("ticket")
+}
+
+model Cart {
+  id         String     @id @default(uuid()) // Using UUID for anonymous carts
+  customerId String?    @map("customer_id") // Optional, for logged-in users
+  status     CartStatus
+  expiresAt  DateTime   @map("expires_at")
+  cartItems  CartItem[]
+  customer   Customer?  @relation(fields: [customerId], references: [id])
+  createdAt  DateTime   @default(now()) @map("created_at")
+  updatedAt  DateTime   @updatedAt @map("updated_at")
+
+  @@index([customerId])
+  @@map("cart")
+}
+
+model CartItem {
+  id           BigInt     @id @default(autoincrement())
+  cartId       String     @map("cart_id")
+  timeSlotId   BigInt     @map("time_slot_id")
+  ticketTypeId BigInt     @map("ticket_type_id")
+  quantity     Int
+  cart         Cart       @relation(fields: [cartId], references: [id])
+  timeSlot     TimeSlot   @relation(fields: [timeSlotId], references: [id])
+  ticketType   TicketType @relation(fields: [ticketTypeId], references: [id])
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  @@unique([cartId, timeSlotId, ticketTypeId])
+  @@index([cartId])
+  @@index([timeSlotId])
+  @@index([ticketTypeId])
+  @@map("cart_item")
+}
+
+model Order {
+  id            BigInt      @id @default(autoincrement())
+  customerId    String      @map("customerId") // Changed to String to match Supabase UUID
+  status        OrderStatus
+  totalAmount   Decimal     @map("total_amount")
+  paymentMethod String      @map("payment_method")
+  transactionId String      @map("transaction_id")
+  paymentStatus String      @map("payment_status")
+  orderedAt     DateTime    @map("ordered_at") // Explicit order time
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+  customer      Customer    @relation(fields: [customerId], references: [id])
+  tickets       Ticket[]
+
+  @@index([customerId])
+  @@map("order")
+}
+
+enum OrgType {
+  individual
+  company
+  organization
+}
+
+enum VerificationStatus {
+  pending
+  verified
+  rejected
+}
+
+enum PayoutFrequency {
+  weekly
+  biweekly
+  monthly
+}
+
+enum CustomerType {
+  regular
+  premium
+  corporate
+}
+
+enum EventStatus {
+  draft
+  published
+  cancelled
+  sold_out
+}
+
+enum OrderStatus {
+  pending
+  completed
+  cancelled
+  refunded
+}
+
+enum TicketStatus {
+  reserved
+  purchased
+  cancelled
+  used
+}
+
+enum CartStatus {
+  active
+  expired
+  converted
+  abandoned
 }
