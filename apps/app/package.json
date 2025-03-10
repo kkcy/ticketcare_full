@@ -8,8 +8,7 @@
     "analyze": "ANALYZE=true pnpm build",
     "test": "NODE_ENV=test vitest run",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
-    "typecheck": "tsc --noEmit --emitDeclarationOnly false",
-    "lint": "next lint"
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
     "@prisma/client": "6.4.1",
