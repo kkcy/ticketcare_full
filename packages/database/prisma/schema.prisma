@@ -11,12 +11,87 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Organiser {
-  id                 String             @id // Supabase UUID
+// User model (core entity for all roles)
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @map("email_verified")
+  image         String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  sessions      Session[]
+  accounts      Account[]
+  role          Role? // ADMIN, CUSTOMER, ORGANIZER
+  banned        Boolean?  @default(false)
+  banReason     String?   @map("ban_reason")
+  banExpires    DateTime? @map("ban_expires")
+
+  // Relationships
+  organizer      Organizer? // A User can be an Organizer
+  orders         Order[] // A User can place orders (customer role)
+  carts          Cart[] // A User can have carts (customer role)
+  approvedEvents Event[]    @relation("ApprovedBy") // Admin approves events
+
+  @@map("user")
+}
+
+// Session model 
+model Session {
+  id             String   @id
+  expiresAt      DateTime @map("expires_at")
+  token          String   @unique
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  ipAddress      String?  @map("ip_address")
+  userAgent      String?  @map("user_agent")
+  userId         String   @map("user_id")
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  impersonatedBy String?  @map("impersonated_by")
+
+  @@map("session")
+}
+
+// Account model 
+model Account {
+  id                    String    @id
+  accountId             String    @map("account_id")
+  providerId            String    @map("provider_id")
+  userId                String    @map("user_id")
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?   @map("access_token")
+  refreshToken          String?   @map("refresh_token")
+  idToken               String?   @map("id_token")
+  accessTokenExpiresAt  DateTime? @map("access_token_expires_at")
+  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  @@map("account")
+}
+
+// Verification model
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime  @map("expires_at")
+  createdAt  DateTime? @default(now()) @map("created_at")
+  updatedAt  DateTime? @updatedAt @map("updated_at")
+
+  @@map("verification")
+}
+
+// Organizer model
+model Organizer {
+  id                 String             @id @default(uuid())
+  userId             String             @unique // One User per Organizer
+  user               User               @relation(fields: [userId], references: [id])
   stripeCustomerId   String?            @unique @map("stripe_customer_id")
   name               String
   slug               String             @unique
-  type               OrgType
   description        String?
   logo               String?
   website            String?
@@ -40,9 +115,11 @@ model Organiser {
   createdAt          DateTime           @default(now()) @map("created_at")
   updatedAt          DateTime           @updatedAt @map("updated_at")
 
-  @@map("organiser")
+  @@index([userId])
+  @@map("organizer")
 }
 
+// Venue model 
 model Venue {
   id             BigInt   @id @default(autoincrement())
   name           String
@@ -72,37 +149,15 @@ model Venue {
   @@map("venue")
 }
 
-model Customer {
-  id                 String       @id // Supabase UUID
-  stripeCustomerId   String?      @unique @map("stripe_customer_id")
-  type               CustomerType
-  firstName          String       @map("first_name")
-  lastName           String       @map("last_name")
-  email              String
-  phone              String?
-  dateOfBirth        DateTime?    @map("date_of_birth")
-  eventTypes         String[]     @map("event_types")
-  emailNotifications Boolean      @map("email_notifications")
-  smsNotifications   Boolean      @map("sms_notifications")
-  pushNotifications  Boolean      @map("push_notifications")
-  lastLogin          DateTime?    @updatedAt @map("last_login")
-  balance            Decimal
-  orders             Order[]
-  carts              Cart[]
-  createdAt          DateTime     @default(now()) @map("created_at")
-  updatedAt          DateTime     @updatedAt @map("updated_at")
-
-  @@map("customer")
-}
-
+// Event model 
 model Event {
   id                 BigInt       @id @default(autoincrement())
-  organizerId        String       @map("organizer_id") // Changed to String for Supabase UUID
+  organizerId        String       @map("organizer_id")
   venueId            BigInt       @map("venue_id")
   title              String
   slug               String       @unique
   description        String?
-  category           String[]
+  category           String[]     @map("categories")
   startTime          DateTime     @map("start_time")
   endTime            DateTime     @map("end_time")
   doorsOpen          DateTime     @map("doors_open")
@@ -111,8 +166,10 @@ model Event {
   requiresApproval   Boolean      @map("requires_approval")
   waitingListEnabled Boolean      @map("waiting_list_enabled")
   refundPolicy       String?      @map("refund_policy")
-  organiser          Organiser    @relation(fields: [organizerId], references: [id])
+  approvedById       String?      @map("approved_by_id")
+  organizer          Organizer    @relation(fields: [organizerId], references: [id])
   venue              Venue        @relation(fields: [venueId], references: [id])
+  approvedBy         User?        @relation("ApprovedBy", fields: [approvedById], references: [id])
   tickets            Ticket[]
   ticketTypes        TicketType[]
   createdAt          DateTime     @default(now()) @map("created_at")
@@ -120,15 +177,17 @@ model Event {
   eventDates         EventDate[]
 
   @@index([organizerId])
+  @@index([approvedById])
   @@map("event")
 }
 
+// EventDate model 
 model EventDate {
   id        BigInt     @id @default(autoincrement())
   eventId   BigInt     @map("event_id")
-  date      DateTime // The specific date
+  date      DateTime
   event     Event      @relation(fields: [eventId], references: [id])
-  timeSlots TimeSlot[] // Relation to time slots
+  timeSlots TimeSlot[]
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
 
@@ -136,6 +195,7 @@ model EventDate {
   @@map("event_date")
 }
 
+// TimeSlot model 
 model TimeSlot {
   id          BigInt      @id @default(autoincrement())
   eventDateId BigInt      @map("event_date_id")
@@ -144,8 +204,8 @@ model TimeSlot {
   doorsOpen   DateTime    @map("doors_open")
   eventDate   EventDate   @relation(fields: [eventDateId], references: [id])
   tickets     Ticket[]
-  inventory   Inventory[] // New relation for managing capacity per time slot
-  cartItems   CartItem[] // New relation for cart items
+  inventory   Inventory[]
+  cartItems   CartItem[]
   createdAt   DateTime    @default(now()) @map("created_at")
   updatedAt   DateTime    @updatedAt @map("updated_at")
 
@@ -153,10 +213,11 @@ model TimeSlot {
   @@map("time_slot")
 }
 
+// TicketType model 
 model TicketType {
   id            BigInt      @id @default(autoincrement())
   eventId       BigInt      @map("event_id")
-  name          String // e.g., "Regular", "VIP"
+  name          String
   description   String?
   price         Decimal
   maxPerOrder   Int         @map("max_per_order")
@@ -164,9 +225,9 @@ model TicketType {
   saleStartTime DateTime    @map("sale_start_time")
   saleEndTime   DateTime    @map("sale_end_time")
   event         Event       @relation(fields: [eventId], references: [id])
-  inventory     Inventory[] // New relation
+  inventory     Inventory[]
   tickets       Ticket[]
-  cartItems     CartItem[] // New relation for cart items
+  cartItems     CartItem[]
   createdAt     DateTime    @default(now()) @map("created_at")
   updatedAt     DateTime    @updatedAt @map("updated_at")
 
@@ -174,12 +235,12 @@ model TicketType {
   @@map("ticket_type")
 }
 
-// New model for managing inventory per time slot and ticket type
+// Inventory model 
 model Inventory {
   id           BigInt     @id @default(autoincrement())
   timeSlotId   BigInt     @map("time_slot_id")
   ticketTypeId BigInt     @map("ticket_type_id")
-  quantity     Int // Available quantity for this combination
+  quantity     Int
   timeSlot     TimeSlot   @relation(fields: [timeSlotId], references: [id])
   ticketType   TicketType @relation(fields: [ticketTypeId], references: [id])
   createdAt    DateTime   @default(now()) @map("created_at")
@@ -191,9 +252,10 @@ model Inventory {
   @@map("inventory")
 }
 
+// Ticket model 
 model Ticket {
   id           BigInt       @id @default(autoincrement())
-  timeSlotId   BigInt       @map("time_slot_id") // New field
+  timeSlotId   BigInt       @map("time_slot_id")
   ticketTypeId BigInt       @map("ticket_type_id")
   orderId      BigInt?      @map("order_id")
   status       TicketStatus
@@ -216,20 +278,22 @@ model Ticket {
   @@map("ticket")
 }
 
+// Updated Cart model
 model Cart {
-  id         String     @id @default(uuid()) // Using UUID for anonymous carts
-  customerId String?    @map("customer_id") // Optional, for logged-in users
-  status     CartStatus
-  expiresAt  DateTime   @map("expires_at")
-  cartItems  CartItem[]
-  customer   Customer?  @relation(fields: [customerId], references: [id])
-  createdAt  DateTime   @default(now()) @map("created_at")
-  updatedAt  DateTime   @updatedAt @map("updated_at")
+  id        String     @id @default(uuid())
+  userId    String?    @map("user_id")
+  status    CartStatus
+  expiresAt DateTime   @map("expires_at")
+  cartItems CartItem[]
+  user      User?      @relation(fields: [userId], references: [id])
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
 
-  @@index([customerId])
+  @@index([userId])
   @@map("cart")
 }
 
+// CartItem model 
 model CartItem {
   id           BigInt     @id @default(autoincrement())
   cartId       String     @map("cart_id")
@@ -249,28 +313,30 @@ model CartItem {
   @@map("cart_item")
 }
 
+// Updated Order model
 model Order {
   id            BigInt      @id @default(autoincrement())
-  customerId    String      @map("customerId") // Changed to String to match Supabase UUID
+  userId        String      @map("user_id")
   status        OrderStatus
   totalAmount   Decimal     @map("total_amount")
   paymentMethod String      @map("payment_method")
   transactionId String      @map("transaction_id")
   paymentStatus String      @map("payment_status")
-  orderedAt     DateTime    @map("ordered_at") // Explicit order time
+  orderedAt     DateTime    @map("ordered_at")
   createdAt     DateTime    @default(now()) @map("created_at")
   updatedAt     DateTime    @updatedAt @map("updated_at")
-  customer      Customer    @relation(fields: [customerId], references: [id])
+  user          User        @relation(fields: [userId], references: [id])
   tickets       Ticket[]
 
-  @@index([customerId])
+  @@index([userId])
   @@map("order")
 }
 
-enum OrgType {
-  individual
-  company
-  organization
+// Enums
+enum Role {
+  ADMIN
+  CUSTOMER
+  ORGANIZER
 }
 
 enum VerificationStatus {
@@ -283,12 +349,6 @@ enum PayoutFrequency {
   weekly
   biweekly
   monthly
-}
-
-enum CustomerType {
-  regular
-  premium
-  corporate
 }
 
 enum EventStatus {

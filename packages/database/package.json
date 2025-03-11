@@ -9,6 +9,9 @@
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "dependencies": {
     "@prisma/client": "6.4.1",
     "@supabase/supabase-js": "^2.49.1",
@@ -23,6 +26,7 @@
     "bufferutil": "^4.0.9",
     "prisma": "6.4.1",
     "supabase": "^2.15.8",
+    "tsx": "^4.19.3",
     "typescript": "^5.8.2"
   }
 }

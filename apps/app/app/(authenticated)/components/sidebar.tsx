@@ -1,6 +1,6 @@
 'use client';
 
-import { OrganizationSwitcher, UserButton } from '@repo/auth/client';
+// import { OrganizationSwitcher, UserButton } from '@repo/auth/client';
 import { ModeToggle } from '@repo/design-system/components/mode-toggle';
 import { Button } from '@repo/design-system/components/ui/button';
 import {
@@ -22,7 +22,7 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
+  // SidebarHeader,
   SidebarInset,
   SidebarMenu,
   SidebarMenuAction,
@@ -31,9 +31,9 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-  useSidebar,
+  // useSidebar,
 } from '@repo/design-system/components/ui/sidebar';
-import { cn } from '@repo/design-system/lib/utils';
+// import { cn } from '@repo/design-system/lib/utils';
 import { NotificationsTrigger } from '@repo/notifications/components/trigger';
 import {
   AnchorIcon,
@@ -190,12 +190,12 @@ const data = {
 };
 
 export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
-  const sidebar = useSidebar();
+  // const sidebar = useSidebar();
 
   return (
     <>
       <Sidebar variant="inset">
-        <SidebarHeader>
+        {/* <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
               <div
@@ -211,7 +211,7 @@ export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
               </div>
             </SidebarMenuItem>
           </SidebarMenu>
-        </SidebarHeader>
+        </SidebarHeader> */}
         <Search />
         <SidebarContent>
           <SidebarGroup>
@@ -326,7 +326,7 @@ export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem className="flex items-center gap-2">
-              <UserButton
+              {/* <UserButton
                 showName
                 appearance={{
                   elements: {
@@ -335,7 +335,7 @@ export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
                     userButtonOuterIdentifier: 'truncate pl-0',
                   },
                 }}
-              />
+              /> */}
               <div className="flex shrink-0 items-center gap-px">
                 <ModeToggle />
                 <Button

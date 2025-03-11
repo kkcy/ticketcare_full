@@ -1,6 +1,5 @@
-import { auth } from '@repo/auth/server';
 import { database } from '@repo/database';
-import { notFound, redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { Header } from '../components/header';
 
 type SearchPageProperties = {
@@ -29,11 +28,12 @@ const SearchPage = async ({ searchParams }: SearchPageProperties) => {
       },
     },
   });
-  const { orgId } = await auth();
 
-  if (!orgId) {
-    notFound();
-  }
+  // const { orgId } = await auth();
+
+  // if (!orgId) {
+  //   notFound();
+  // }
 
   if (!q) {
     redirect('/');

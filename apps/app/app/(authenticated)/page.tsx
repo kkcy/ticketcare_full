@@ -1,9 +1,5 @@
-import { env } from '@/env';
-import { auth } from '@repo/auth/server';
 import { database } from '@repo/database';
 import type { Metadata } from 'next';
-import dynamic from 'next/dynamic';
-import { notFound } from 'next/navigation';
 import { Header } from './components/header';
 
 const title = 'Acme Inc';
@@ -16,11 +12,11 @@ export const metadata: Metadata = {
 
 const App = async () => {
   const pages = await database.page.findMany();
-  const { orgId } = await auth();
+  // const { orgId } = await auth();
 
-  if (!orgId) {
-    notFound();
-  }
+  // if (!orgId) {
+  //   notFound();
+  // }
 
   return (
     <>

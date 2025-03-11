@@ -1,14 +1,11 @@
 -- CreateEnum
-CREATE TYPE "OrgType" AS ENUM ('individual', 'company', 'organization');
+CREATE TYPE "Role" AS ENUM ('ADMIN', 'CUSTOMER', 'ORGANIZER');
 
 -- CreateEnum
 CREATE TYPE "VerificationStatus" AS ENUM ('pending', 'verified', 'rejected');
 
 -- CreateEnum
 CREATE TYPE "PayoutFrequency" AS ENUM ('weekly', 'biweekly', 'monthly');
-
--- CreateEnum
-CREATE TYPE "CustomerType" AS ENUM ('regular', 'premium', 'corporate');
 
 -- CreateEnum
 CREATE TYPE "EventStatus" AS ENUM ('draft', 'published', 'cancelled', 'sold_out');
@@ -23,12 +20,75 @@ CREATE TYPE "TicketStatus" AS ENUM ('reserved', 'purchased', 'cancelled', 'used'
 CREATE TYPE "CartStatus" AS ENUM ('active', 'expired', 'converted', 'abandoned');
 
 -- CreateTable
-CREATE TABLE "organiser" (
+CREATE TABLE "user" (
     "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "email_verified" BOOLEAN NOT NULL,
+    "image" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "role" "Role",
+    "banned" BOOLEAN DEFAULT false,
+    "ban_reason" TEXT,
+    "ban_expires" TIMESTAMP(3),
+
+    CONSTRAINT "user_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "session" (
+    "id" TEXT NOT NULL,
+    "expires_at" TIMESTAMP(3) NOT NULL,
+    "token" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "ip_address" TEXT,
+    "user_agent" TEXT,
+    "user_id" TEXT NOT NULL,
+    "impersonated_by" TEXT,
+
+    CONSTRAINT "session_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "account" (
+    "id" TEXT NOT NULL,
+    "account_id" TEXT NOT NULL,
+    "provider_id" TEXT NOT NULL,
+    "user_id" TEXT NOT NULL,
+    "access_token" TEXT,
+    "refresh_token" TEXT,
+    "id_token" TEXT,
+    "access_token_expires_at" TIMESTAMP(3),
+    "refresh_token_expires_at" TIMESTAMP(3),
+    "scope" TEXT,
+    "password" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "account_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "verification" (
+    "id" TEXT NOT NULL,
+    "identifier" TEXT NOT NULL,
+    "value" TEXT NOT NULL,
+    "expires_at" TIMESTAMP(3) NOT NULL,
+    "created_at" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3),
+
+    CONSTRAINT "verification_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "organizer" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
     "stripe_customer_id" TEXT,
     "name" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
-    "type" "OrgType" NOT NULL,
     "description" TEXT,
     "logo" TEXT,
     "website" TEXT,
@@ -51,7 +111,7 @@ CREATE TABLE "organiser" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "organiser_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "organizer_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -84,28 +144,6 @@ CREATE TABLE "venue" (
 );
 
 -- CreateTable
-CREATE TABLE "customer" (
-    "id" TEXT NOT NULL,
-    "stripe_customer_id" TEXT,
-    "type" "CustomerType" NOT NULL,
-    "first_name" TEXT NOT NULL,
-    "last_name" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
-    "phone" TEXT,
-    "date_of_birth" TIMESTAMP(3),
-    "event_types" TEXT[],
-    "email_notifications" BOOLEAN NOT NULL,
-    "sms_notifications" BOOLEAN NOT NULL,
-    "push_notifications" BOOLEAN NOT NULL,
-    "last_login" TIMESTAMP(3),
-    "balance" DECIMAL(65,30) NOT NULL,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "customer_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "event" (
     "id" BIGSERIAL NOT NULL,
     "organizer_id" TEXT NOT NULL,
@@ -113,7 +151,7 @@ CREATE TABLE "event" (
     "title" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "description" TEXT,
-    "category" TEXT[],
+    "categories" TEXT[],
     "start_time" TIMESTAMP(3) NOT NULL,
     "end_time" TIMESTAMP(3) NOT NULL,
     "doors_open" TIMESTAMP(3) NOT NULL,
@@ -122,6 +160,7 @@ CREATE TABLE "event" (
     "requires_approval" BOOLEAN NOT NULL,
     "waiting_list_enabled" BOOLEAN NOT NULL,
     "refund_policy" TEXT,
+    "approved_by_id" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -203,7 +242,7 @@ CREATE TABLE "ticket" (
 -- CreateTable
 CREATE TABLE "cart" (
     "id" TEXT NOT NULL,
-    "customer_id" TEXT,
+    "user_id" TEXT,
     "status" "CartStatus" NOT NULL,
     "expires_at" TIMESTAMP(3) NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -228,7 +267,7 @@ CREATE TABLE "cart_item" (
 -- CreateTable
 CREATE TABLE "order" (
     "id" BIGSERIAL NOT NULL,
-    "customerId" TEXT NOT NULL,
+    "user_id" TEXT NOT NULL,
     "status" "OrderStatus" NOT NULL,
     "total_amount" DECIMAL(65,30) NOT NULL,
     "payment_method" TEXT NOT NULL,
@@ -242,22 +281,34 @@ CREATE TABLE "order" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "organiser_stripe_customer_id_key" ON "organiser"("stripe_customer_id");
+CREATE UNIQUE INDEX "user_email_key" ON "user"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "organiser_slug_key" ON "organiser"("slug");
+CREATE UNIQUE INDEX "session_token_key" ON "session"("token");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "organizer_userId_key" ON "organizer"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "organizer_stripe_customer_id_key" ON "organizer"("stripe_customer_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "organizer_slug_key" ON "organizer"("slug");
+
+-- CreateIndex
+CREATE INDEX "organizer_userId_idx" ON "organizer"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "venue_slug_key" ON "venue"("slug");
-
--- CreateIndex
-CREATE UNIQUE INDEX "customer_stripe_customer_id_key" ON "customer"("stripe_customer_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "event_slug_key" ON "event"("slug");
 
 -- CreateIndex
 CREATE INDEX "event_organizer_id_idx" ON "event"("organizer_id");
+
+-- CreateIndex
+CREATE INDEX "event_approved_by_id_idx" ON "event"("approved_by_id");
 
 -- CreateIndex
 CREATE INDEX "event_date_event_id_idx" ON "event_date"("event_id");
@@ -287,7 +338,7 @@ CREATE INDEX "ticket_ticket_type_id_idx" ON "ticket"("ticket_type_id");
 CREATE INDEX "ticket_order_id_idx" ON "ticket"("order_id");
 
 -- CreateIndex
-CREATE INDEX "cart_customer_id_idx" ON "cart"("customer_id");
+CREATE INDEX "cart_user_id_idx" ON "cart"("user_id");
 
 -- CreateIndex
 CREATE INDEX "cart_item_cart_id_idx" ON "cart_item"("cart_id");
@@ -302,13 +353,25 @@ CREATE INDEX "cart_item_ticket_type_id_idx" ON "cart_item"("ticket_type_id");
 CREATE UNIQUE INDEX "cart_item_cart_id_time_slot_id_ticket_type_id_key" ON "cart_item"("cart_id", "time_slot_id", "ticket_type_id");
 
 -- CreateIndex
-CREATE INDEX "order_customerId_idx" ON "order"("customerId");
+CREATE INDEX "order_user_id_idx" ON "order"("user_id");
 
 -- AddForeignKey
-ALTER TABLE "event" ADD CONSTRAINT "event_organizer_id_fkey" FOREIGN KEY ("organizer_id") REFERENCES "organiser"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "session" ADD CONSTRAINT "session_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "account" ADD CONSTRAINT "account_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "organizer" ADD CONSTRAINT "organizer_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "event" ADD CONSTRAINT "event_organizer_id_fkey" FOREIGN KEY ("organizer_id") REFERENCES "organizer"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "event" ADD CONSTRAINT "event_venue_id_fkey" FOREIGN KEY ("venue_id") REFERENCES "venue"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "event" ADD CONSTRAINT "event_approved_by_id_fkey" FOREIGN KEY ("approved_by_id") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "event_date" ADD CONSTRAINT "event_date_event_id_fkey" FOREIGN KEY ("event_id") REFERENCES "event"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -338,7 +401,7 @@ ALTER TABLE "ticket" ADD CONSTRAINT "ticket_order_id_fkey" FOREIGN KEY ("order_i
 ALTER TABLE "ticket" ADD CONSTRAINT "ticket_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "event"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "cart" ADD CONSTRAINT "cart_customer_id_fkey" FOREIGN KEY ("customer_id") REFERENCES "customer"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "cart" ADD CONSTRAINT "cart_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "cart_item" ADD CONSTRAINT "cart_item_cart_id_fkey" FOREIGN KEY ("cart_id") REFERENCES "cart"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -350,4 +413,4 @@ ALTER TABLE "cart_item" ADD CONSTRAINT "cart_item_time_slot_id_fkey" FOREIGN KEY
 ALTER TABLE "cart_item" ADD CONSTRAINT "cart_item_ticket_type_id_fkey" FOREIGN KEY ("ticket_type_id") REFERENCES "ticket_type"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "order" ADD CONSTRAINT "order_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "customer"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "order" ADD CONSTRAINT "order_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
