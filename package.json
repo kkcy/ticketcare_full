@@ -7,7 +7,7 @@
   "files": ["dist/index.js"],
   "scripts": {
     "build": "turbo build",
-    "dev": "turbo dev --filter=!docs --filter=!email --filter=!studio --filter=!storybook",
+    "dev": "turbo dev --filter=!docs --filter=!email --filter=!studio --filter=!storybook --filter=!@repo/cms",
     "lint": "ultracite lint",
     "format": "ultracite format",
     "test": "turbo test",

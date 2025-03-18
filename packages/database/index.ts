@@ -12,6 +12,7 @@ export {
   CartStatus,
   EventStatus,
   OrderStatus,
+  Prisma as PrismaNamespace,
 } from '@prisma/client';
 export type { User, Organization } from '@prisma/client';
 
