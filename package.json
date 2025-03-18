@@ -7,7 +7,7 @@
   "files": ["dist/index.js"],
   "scripts": {
     "build": "turbo build",
-    "dev": "turbo dev",
+    "dev": "turbo dev --filter=!docs --filter=!email --filter=!studio --filter=!storybook",
     "lint": "ultracite lint",
     "format": "ultracite format",
     "test": "turbo test",
@@ -16,6 +16,7 @@
     "boundaries": "turbo boundaries",
     "bump-deps": "npx npm-check-updates --deep -u -x react-day-picker && pnpm install",
     "bump-ui": "npx shadcn@latest add --all --overwrite -c packages/design-system",
+    "better-auth": "npx @better-auth/cli generate --output ./packages/database/prisma/schema.prisma --config ./packages/auth/server.ts",
     "prisma": "cd packages/database && npx prisma format && npx prisma generate",
     "migrate": "cd packages/database && npx prisma format && npx prisma generate && npx prisma migrate dev",
     "migrate-reset": "cd packages/database && npx prisma db push --force-reset",

@@ -1,4 +1,4 @@
-import 'server-only';
+// import 'server-only';
 import { PostHog } from 'posthog-node';
 import { keys } from '../keys';
 

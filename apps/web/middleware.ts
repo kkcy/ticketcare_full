@@ -24,7 +24,7 @@ const securityHeaders = env.FLAGS_SECRET
   ? noseconeMiddleware(noseconeOptionsWithToolbar)
   : noseconeMiddleware(noseconeOptions);
 
-const middleware = authMiddleware(async (_auth, request) => {
+const middleware = authMiddleware(async (request) => {
   const i18nResponse = internationalizationMiddleware(
     request as unknown as NextRequest
   );

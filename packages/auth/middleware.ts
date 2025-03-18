@@ -1,23 +1,25 @@
-import type { NextRequest } from "next/server";
+import { getSessionCookie } from 'better-auth/cookies';
+import type { NextFetchEvent, NextMiddleware, NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-const isProtectedRoute = (request: NextRequest) => {
-  return request.url.startsWith("/dashboard"); // change this to your protected route
-}
+export const authMiddleware = (next?: NextMiddleware) => {
+  const action = (request: NextRequest, event: NextFetchEvent) => {
+    const pathname = request.nextUrl.pathname;
 
-export const authMiddleware = async (request: NextRequest) => {
-  const url = new URL('/api/auth/get-session', request.nextUrl.origin);
-  const response = await fetch(url, {
-    headers: {
-      cookie: request.headers.get('cookie') || '',
-    },
-  });
+    // Only check auth for dashboard routes
+    if (pathname.startsWith('/dashboard')) {
+      const sessionCookie = getSessionCookie(request);
+      if (!sessionCookie) {
+        return NextResponse.redirect(new URL('/sign-in', request.url));
+      }
+    }
 
-  const session = await response.json();
-  
-  if (isProtectedRoute(request) && !session) {
-    return NextResponse.redirect(new URL("/sign-in", request.url));
-  }
-  
-  return NextResponse.next();
-}
+    return next?.(request, event) ?? NextResponse.next();
+  };
+
+  return action;
+};
+
+export const config = {
+  matcher: ['/dashboard/:path*'], // Match dashboard and all its subroutes
+};

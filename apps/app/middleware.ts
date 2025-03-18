@@ -11,10 +11,7 @@ const securityHeaders = env.FLAGS_SECRET
   ? noseconeMiddleware(noseconeOptionsWithToolbar)
   : noseconeMiddleware(noseconeOptions);
 
-// @ts-expect-error NextMiddleware type is not compatible with authMiddleware
-export default authMiddleware(() =>
-  securityHeaders()
-) as unknown as NextMiddleware;
+export default authMiddleware(securityHeaders) as NextMiddleware;
 
 export const config = {
   matcher: [

@@ -1,6 +1,12 @@
 'use client';
-
-// import { OrganizationSwitcher, UserButton } from '@repo/auth/client';
+import {
+  clearActiveOrganization,
+  setActiveOrganization,
+} from '@/app/actions/active-organization';
+import { signOut, useActiveOrganization } from '@repo/auth/client';
+import { OrganizationSwitcher } from '@repo/auth/components/organization-switcher';
+import { UserButton } from '@repo/auth/components/user-button';
+import type { Organization, User } from '@repo/database';
 import { ModeToggle } from '@repo/design-system/components/mode-toggle';
 import { Button } from '@repo/design-system/components/ui/button';
 import {
@@ -22,7 +28,7 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  // SidebarHeader,
+  SidebarHeader,
   SidebarInset,
   SidebarMenu,
   SidebarMenuAction,
@@ -31,9 +37,9 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-  // useSidebar,
+  useSidebar,
 } from '@repo/design-system/components/ui/sidebar';
-// import { cn } from '@repo/design-system/lib/utils';
+import { cn } from '@repo/design-system/lib/utils';
 import { NotificationsTrigger } from '@repo/notifications/components/trigger';
 import {
   AnchorIcon,
@@ -53,10 +59,14 @@ import {
   Trash2Icon,
 } from 'lucide-react';
 import Link from 'next/link';
-import type { ReactNode } from 'react';
+import { redirect } from 'next/navigation';
+import { type ReactNode, useEffect } from 'react';
 import { Search } from './search';
 
 type GlobalSidebarProperties = {
+  user?: User;
+  activeOrganizationId?: string;
+  activeOrganization?: Organization;
   readonly children: ReactNode;
 };
 
@@ -189,29 +199,62 @@ const data = {
   ],
 };
 
-export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
-  // const sidebar = useSidebar();
+export const GlobalSidebar = ({
+  user,
+  activeOrganizationId,
+  activeOrganization,
+  children,
+}: GlobalSidebarProperties) => {
+  const sidebar = useSidebar();
+  const { data: organization } = useActiveOrganization();
+
+  // if we have activeOrganizationId & not activeOrganization,
+  // setActiveOrganization for cookie persistent for future use
+  useEffect(() => {
+    if (activeOrganizationId && organization && !activeOrganization) {
+      setActiveOrganization({
+        id: organization.id,
+        name: organization.name,
+        slug: organization.slug,
+        logo: organization.logo,
+        createdAt: organization.createdAt,
+        metadata: organization.metadata,
+        chipApiKey: organization.chipApiKey,
+      });
+    }
+  }, [activeOrganizationId, activeOrganization, organization]);
 
   return (
     <>
       <Sidebar variant="inset">
-        {/* <SidebarHeader>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <div
-                className={cn(
-                  'h-[36px] overflow-hidden transition-all [&>div]:w-full',
-                  sidebar.open ? '' : '-mx-1'
-                )}
-              >
-                <OrganizationSwitcher
-                  hidePersonal
-                  afterSelectOrganizationUrl="/"
-                />
-              </div>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarHeader> */}
+        <SidebarHeader>
+          {(activeOrganization || organization) && (
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <div
+                  className={cn(
+                    'h-[36px] overflow-hidden transition-all [&>div]:w-full',
+                    sidebar.open ? '' : '-mx-1'
+                  )}
+                >
+                  <OrganizationSwitcher
+                    activeOrganization={
+                      activeOrganization || {
+                        id: organization?.id,
+                        name: organization?.name,
+                        slug: organization?.slug,
+                        logo: organization?.logo,
+                        createdAt: organization?.createdAt,
+                        metadata: organization?.metadata,
+                        chipApiKey: organization?.chipApiKey,
+                      }
+                    }
+                  />
+                </div>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          )}
+        </SidebarHeader>
         <Search />
         <SidebarContent>
           <SidebarGroup>
@@ -326,16 +369,20 @@ export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem className="flex items-center gap-2">
-              {/* <UserButton
+              <UserButton
+                user={user}
                 showName
-                appearance={{
-                  elements: {
-                    rootBox: 'flex overflow-hidden w-full',
-                    userButtonBox: 'flex-row-reverse',
-                    userButtonOuterIdentifier: 'truncate pl-0',
-                  },
+                onSignOut={() => {
+                  signOut({
+                    fetchOptions: {
+                      onSuccess: () => {
+                        clearActiveOrganization();
+                        redirect('/sign-in');
+                      },
+                    },
+                  });
                 }}
-              /> */}
+              />
               <div className="flex shrink-0 items-center gap-px">
                 <ModeToggle />
                 <Button

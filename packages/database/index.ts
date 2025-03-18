@@ -1,4 +1,4 @@
-// import 'server-only';
+import 'server-only';
 
 import { PrismaClient, Prisma as PrismaNamespace } from '@prisma/client';
 
@@ -12,8 +12,8 @@ export {
   CartStatus,
   EventStatus,
   OrderStatus,
-  type User,
 } from '@prisma/client';
+export type { User, Organization } from '@prisma/client';
 
 type SerializedPrisma<T> = T extends PrismaNamespace.Decimal
   ? number

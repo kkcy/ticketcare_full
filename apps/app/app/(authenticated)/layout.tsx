@@ -1,10 +1,12 @@
 import { env } from '@/env';
 import { auth } from '@repo/auth/server';
+import type { Organization, User } from '@repo/database';
 import { SidebarProvider } from '@repo/design-system/components/ui/sidebar';
 import { showBetaFeature } from '@repo/feature-flags';
 import { NotificationsProvider } from '@repo/notifications/components/provider';
 import { secure } from '@repo/security';
 import { headers } from 'next/headers';
+import { cookies as getCookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { PostHogIdentifier } from './components/posthog-identifier';
@@ -19,21 +21,35 @@ const AppLayout = async ({ children }: AppLayoutProperties) => {
     await secure(['CATEGORY:PREVIEW']);
   }
 
+  // Check if user is already authenticated
   const session = await auth.api.getSession({
     headers: await headers(),
   });
+
   if (!session?.user) {
+    // If user is not authenticated, redirect to sign-in page
     return redirect('/sign-in');
   }
 
   const betaFeature = await showBetaFeature();
 
   const user = session.user;
+  const activeOrganizationId = session.session.activeOrganizationId;
+  const cookies = await getCookies();
+  const activeOrganization: Organization | undefined = cookies.get(
+    'activeOrganization'
+  )?.value
+    ? JSON.parse(cookies.get('activeOrganization')?.value || '')
+    : undefined;
 
   return (
     <NotificationsProvider userId={user.id}>
       <SidebarProvider>
-        <GlobalSidebar>
+        <GlobalSidebar
+          user={user as User}
+          activeOrganization={activeOrganization}
+          activeOrganizationId={activeOrganizationId ?? undefined}
+        >
           {betaFeature && (
             <div className="m-4 rounded-full bg-blue-500 p-1.5 text-center text-sm text-white">
               Beta feature now available

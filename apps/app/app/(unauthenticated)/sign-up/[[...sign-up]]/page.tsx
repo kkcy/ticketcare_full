@@ -16,7 +16,9 @@ const SignUpPage = () => (
       <h1 className="font-semibold text-2xl tracking-tight">{title}</h1>
       <p className="text-muted-foreground text-sm">{description}</p>
     </div>
-    <SignUp />
+    <div className="px-4">
+      <SignUp />
+    </div>
   </>
 );
 

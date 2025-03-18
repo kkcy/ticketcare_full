@@ -11,7 +11,8 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// User model (core entity for all roles)
+//// User model (core entity for all roles)
+
 model User {
   id            String    @id
   name          String
@@ -22,7 +23,7 @@ model User {
   updatedAt     DateTime  @updatedAt @map("updated_at")
   sessions      Session[]
   accounts      Account[]
-  role          Role? // ADMIN, CUSTOMER, ORGANIZER
+  role          String    @default("customer") // super-admin, admin, customer
   banned        Boolean?  @default(false)
   banReason     String?   @map("ban_reason")
   banExpires    DateTime? @map("ban_expires")
@@ -33,10 +34,64 @@ model User {
   carts          Cart[] // A User can have carts (customer role)
   approvedEvents Event[]    @relation("ApprovedBy") // Admin approves events
 
+  firstName String?   @map("first_name")
+  lastName  String?   @map("last_name")
+  phone     String?
+  dob       DateTime?
+
+  // organization fields
+  members     Member[]
+  invitations Invitation[]
+
   @@map("user")
 }
 
-// Session model 
+//// Organization models
+
+model Organization {
+  id          String       @id
+  name        String
+  slug        String?
+  logo        String?
+  createdAt   DateTime     @default(now()) @map("created_at")
+  metadata    String?
+  members     Member[]
+  invitations Invitation[]
+
+  chipApiKey String? @map("chip_api_key") // api key for chip payment gateway
+
+  @@unique([slug])
+  @@map("organization")
+}
+
+model Member {
+  id             String       @id
+  organizationId String       @map("organization_id")
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String       @map("user_id")
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           String // owner, organizer
+  createdAt      DateTime     @default(now()) @map("created_at")
+
+  @@map("member")
+}
+
+model Invitation {
+  id             String       @id
+  organizationId String       @map("organization_id")
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String
+  role           String?
+  status         String
+  expiresAt      DateTime     @map("expires_at")
+  inviterId      String       @map("inviter_id")
+  user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+
+  @@map("invitation")
+}
+
+//// Auth models
+
 model Session {
   id             String   @id
   expiresAt      DateTime @map("expires_at")
@@ -49,14 +104,15 @@ model Session {
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   impersonatedBy String?  @map("impersonated_by")
 
+  activeOrganizationId String?
+
   @@map("session")
 }
 
-// Account model 
 model Account {
   id                    String    @id
-  accountId             String    @map("account_id")
-  providerId            String    @map("provider_id")
+  accountId             String?   @map("account_id") // oauth account id
+  providerId            String    @map("provider_id") // account type: credential, google, apple, oauth...
   userId                String    @map("user_id")
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?   @map("access_token")
@@ -72,7 +128,6 @@ model Account {
   @@map("account")
 }
 
-// Verification model
 model Verification {
   id         String    @id
   identifier String
@@ -84,12 +139,10 @@ model Verification {
   @@map("verification")
 }
 
-// Organizer model
 model Organizer {
   id                 String             @id @default(uuid())
-  userId             String             @unique // One User per Organizer
-  user               User               @relation(fields: [userId], references: [id])
-  stripeCustomerId   String?            @unique @map("stripe_customer_id")
+  userId             String             @unique @map("user_id") // One User per Organizer
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   name               String
   slug               String             @unique
   description        String?
@@ -119,7 +172,6 @@ model Organizer {
   @@map("organizer")
 }
 
-// Venue model 
 model Venue {
   id             BigInt   @id @default(autoincrement())
   name           String
@@ -149,7 +201,6 @@ model Venue {
   @@map("venue")
 }
 
-// Event model 
 model Event {
   id                 BigInt       @id @default(autoincrement())
   organizerId        String       @map("organizer_id")
@@ -167,9 +218,9 @@ model Event {
   waitingListEnabled Boolean      @map("waiting_list_enabled")
   refundPolicy       String?      @map("refund_policy")
   approvedById       String?      @map("approved_by_id")
-  organizer          Organizer    @relation(fields: [organizerId], references: [id])
-  venue              Venue        @relation(fields: [venueId], references: [id])
-  approvedBy         User?        @relation("ApprovedBy", fields: [approvedById], references: [id])
+  organizer          Organizer    @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  venue              Venue        @relation(fields: [venueId], references: [id], onDelete: Restrict)
+  approvedBy         User?        @relation("ApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
   tickets            Ticket[]
   ticketTypes        TicketType[]
   createdAt          DateTime     @default(now()) @map("created_at")
@@ -181,12 +232,11 @@ model Event {
   @@map("event")
 }
 
-// EventDate model 
 model EventDate {
   id        BigInt     @id @default(autoincrement())
   eventId   BigInt     @map("event_id")
   date      DateTime
-  event     Event      @relation(fields: [eventId], references: [id])
+  event     Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
   timeSlots TimeSlot[]
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
@@ -195,14 +245,13 @@ model EventDate {
   @@map("event_date")
 }
 
-// TimeSlot model 
 model TimeSlot {
   id          BigInt      @id @default(autoincrement())
   eventDateId BigInt      @map("event_date_id")
   startTime   DateTime    @map("start_time")
   endTime     DateTime    @map("end_time")
   doorsOpen   DateTime    @map("doors_open")
-  eventDate   EventDate   @relation(fields: [eventDateId], references: [id])
+  eventDate   EventDate   @relation(fields: [eventDateId], references: [id], onDelete: Cascade)
   tickets     Ticket[]
   inventory   Inventory[]
   cartItems   CartItem[]
@@ -213,7 +262,6 @@ model TimeSlot {
   @@map("time_slot")
 }
 
-// TicketType model 
 model TicketType {
   id            BigInt      @id @default(autoincrement())
   eventId       BigInt      @map("event_id")
@@ -224,7 +272,7 @@ model TicketType {
   minPerOrder   Int         @map("min_per_order")
   saleStartTime DateTime    @map("sale_start_time")
   saleEndTime   DateTime    @map("sale_end_time")
-  event         Event       @relation(fields: [eventId], references: [id])
+  event         Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
   inventory     Inventory[]
   tickets       Ticket[]
   cartItems     CartItem[]
@@ -235,14 +283,13 @@ model TicketType {
   @@map("ticket_type")
 }
 
-// Inventory model 
 model Inventory {
   id           BigInt     @id @default(autoincrement())
   timeSlotId   BigInt     @map("time_slot_id")
   ticketTypeId BigInt     @map("ticket_type_id")
   quantity     Int
-  timeSlot     TimeSlot   @relation(fields: [timeSlotId], references: [id])
-  ticketType   TicketType @relation(fields: [ticketTypeId], references: [id])
+  timeSlot     TimeSlot   @relation(fields: [timeSlotId], references: [id], onDelete: Cascade)
+  ticketType   TicketType @relation(fields: [ticketTypeId], references: [id], onDelete: Cascade)
   createdAt    DateTime   @default(now()) @map("created_at")
   updatedAt    DateTime   @updatedAt @map("updated_at")
 
@@ -252,7 +299,6 @@ model Inventory {
   @@map("inventory")
 }
 
-// Ticket model 
 model Ticket {
   id           BigInt       @id @default(autoincrement())
   timeSlotId   BigInt       @map("time_slot_id")
@@ -264,10 +310,10 @@ model Ticket {
   ownerEmail   String?      @map("owner_email")
   ownerPhone   String?      @map("owner_phone")
   qrCode       String       @map("qr_code")
-  timeSlot     TimeSlot     @relation(fields: [timeSlotId], references: [id])
-  ticketType   TicketType   @relation(fields: [ticketTypeId], references: [id])
-  order        Order?       @relation(fields: [orderId], references: [id])
-  event        Event?       @relation(fields: [eventId], references: [id])
+  timeSlot     TimeSlot     @relation(fields: [timeSlotId], references: [id], onDelete: Cascade)
+  ticketType   TicketType   @relation(fields: [ticketTypeId], references: [id], onDelete: Cascade)
+  order        Order?       @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  event        Event?       @relation(fields: [eventId], references: [id], onDelete: SetNull)
   eventId      BigInt?
   createdAt    DateTime     @default(now()) @map("created_at")
   updatedAt    DateTime     @updatedAt @map("updated_at")
@@ -278,14 +324,13 @@ model Ticket {
   @@map("ticket")
 }
 
-// Updated Cart model
 model Cart {
   id        String     @id @default(uuid())
   userId    String?    @map("user_id")
   status    CartStatus
   expiresAt DateTime   @map("expires_at")
   cartItems CartItem[]
-  user      User?      @relation(fields: [userId], references: [id])
+  user      User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
 
@@ -293,16 +338,15 @@ model Cart {
   @@map("cart")
 }
 
-// CartItem model 
 model CartItem {
   id           BigInt     @id @default(autoincrement())
   cartId       String     @map("cart_id")
   timeSlotId   BigInt     @map("time_slot_id")
   ticketTypeId BigInt     @map("ticket_type_id")
   quantity     Int
-  cart         Cart       @relation(fields: [cartId], references: [id])
-  timeSlot     TimeSlot   @relation(fields: [timeSlotId], references: [id])
-  ticketType   TicketType @relation(fields: [ticketTypeId], references: [id])
+  cart         Cart       @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  timeSlot     TimeSlot   @relation(fields: [timeSlotId], references: [id], onDelete: Cascade)
+  ticketType   TicketType @relation(fields: [ticketTypeId], references: [id], onDelete: Cascade)
   createdAt    DateTime   @default(now()) @map("created_at")
   updatedAt    DateTime   @updatedAt @map("updated_at")
 
@@ -313,7 +357,6 @@ model CartItem {
   @@map("cart_item")
 }
 
-// Updated Order model
 model Order {
   id            BigInt      @id @default(autoincrement())
   userId        String      @map("user_id")
@@ -325,19 +368,14 @@ model Order {
   orderedAt     DateTime    @map("ordered_at")
   createdAt     DateTime    @default(now()) @map("created_at")
   updatedAt     DateTime    @updatedAt @map("updated_at")
-  user          User        @relation(fields: [userId], references: [id])
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   tickets       Ticket[]
 
   @@index([userId])
   @@map("order")
 }
 
-// Enums
-enum Role {
-  ADMIN
-  CUSTOMER
-  ORGANIZER
-}
+//// Enums
 
 enum VerificationStatus {
   pending

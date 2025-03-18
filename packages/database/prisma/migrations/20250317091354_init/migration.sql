@@ -1,7 +1,4 @@
 -- CreateEnum
-CREATE TYPE "Role" AS ENUM ('ADMIN', 'CUSTOMER', 'ORGANIZER');
-
--- CreateEnum
 CREATE TYPE "VerificationStatus" AS ENUM ('pending', 'verified', 'rejected');
 
 -- CreateEnum
@@ -28,12 +25,53 @@ CREATE TABLE "user" (
     "image" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
-    "role" "Role",
+    "role" TEXT NOT NULL DEFAULT 'customer',
     "banned" BOOLEAN DEFAULT false,
     "ban_reason" TEXT,
     "ban_expires" TIMESTAMP(3),
+    "first_name" TEXT,
+    "last_name" TEXT,
+    "phone" TEXT,
+    "dob" TIMESTAMP(3),
 
     CONSTRAINT "user_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "organization" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "slug" TEXT,
+    "logo" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "metadata" TEXT,
+    "chip_api_key" TEXT,
+
+    CONSTRAINT "organization_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "member" (
+    "id" TEXT NOT NULL,
+    "organization_id" TEXT NOT NULL,
+    "user_id" TEXT NOT NULL,
+    "role" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "member_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "invitation" (
+    "id" TEXT NOT NULL,
+    "organization_id" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "role" TEXT,
+    "status" TEXT NOT NULL,
+    "expires_at" TIMESTAMP(3) NOT NULL,
+    "inviter_id" TEXT NOT NULL,
+
+    CONSTRAINT "invitation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -47,6 +85,7 @@ CREATE TABLE "session" (
     "user_agent" TEXT,
     "user_id" TEXT NOT NULL,
     "impersonated_by" TEXT,
+    "activeOrganizationId" TEXT,
 
     CONSTRAINT "session_pkey" PRIMARY KEY ("id")
 );
@@ -54,7 +93,7 @@ CREATE TABLE "session" (
 -- CreateTable
 CREATE TABLE "account" (
     "id" TEXT NOT NULL,
-    "account_id" TEXT NOT NULL,
+    "account_id" TEXT,
     "provider_id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
     "access_token" TEXT,
@@ -85,8 +124,7 @@ CREATE TABLE "verification" (
 -- CreateTable
 CREATE TABLE "organizer" (
     "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "stripe_customer_id" TEXT,
+    "user_id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "description" TEXT,
@@ -284,19 +322,19 @@ CREATE TABLE "order" (
 CREATE UNIQUE INDEX "user_email_key" ON "user"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "organization_slug_key" ON "organization"("slug");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "session_token_key" ON "session"("token");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "organizer_userId_key" ON "organizer"("userId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "organizer_stripe_customer_id_key" ON "organizer"("stripe_customer_id");
+CREATE UNIQUE INDEX "organizer_user_id_key" ON "organizer"("user_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "organizer_slug_key" ON "organizer"("slug");
 
 -- CreateIndex
-CREATE INDEX "organizer_userId_idx" ON "organizer"("userId");
+CREATE INDEX "organizer_user_id_idx" ON "organizer"("user_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "venue_slug_key" ON "venue"("slug");
@@ -356,16 +394,28 @@ CREATE UNIQUE INDEX "cart_item_cart_id_time_slot_id_ticket_type_id_key" ON "cart
 CREATE INDEX "order_user_id_idx" ON "order"("user_id");
 
 -- AddForeignKey
+ALTER TABLE "member" ADD CONSTRAINT "member_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "member" ADD CONSTRAINT "member_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "invitation" ADD CONSTRAINT "invitation_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "invitation" ADD CONSTRAINT "invitation_inviter_id_fkey" FOREIGN KEY ("inviter_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "session" ADD CONSTRAINT "session_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "account" ADD CONSTRAINT "account_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "organizer" ADD CONSTRAINT "organizer_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "organizer" ADD CONSTRAINT "organizer_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "event" ADD CONSTRAINT "event_organizer_id_fkey" FOREIGN KEY ("organizer_id") REFERENCES "organizer"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "event" ADD CONSTRAINT "event_organizer_id_fkey" FOREIGN KEY ("organizer_id") REFERENCES "organizer"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "event" ADD CONSTRAINT "event_venue_id_fkey" FOREIGN KEY ("venue_id") REFERENCES "venue"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -374,25 +424,25 @@ ALTER TABLE "event" ADD CONSTRAINT "event_venue_id_fkey" FOREIGN KEY ("venue_id"
 ALTER TABLE "event" ADD CONSTRAINT "event_approved_by_id_fkey" FOREIGN KEY ("approved_by_id") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "event_date" ADD CONSTRAINT "event_date_event_id_fkey" FOREIGN KEY ("event_id") REFERENCES "event"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "event_date" ADD CONSTRAINT "event_date_event_id_fkey" FOREIGN KEY ("event_id") REFERENCES "event"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "time_slot" ADD CONSTRAINT "time_slot_event_date_id_fkey" FOREIGN KEY ("event_date_id") REFERENCES "event_date"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "time_slot" ADD CONSTRAINT "time_slot_event_date_id_fkey" FOREIGN KEY ("event_date_id") REFERENCES "event_date"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ticket_type" ADD CONSTRAINT "ticket_type_event_id_fkey" FOREIGN KEY ("event_id") REFERENCES "event"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ticket_type" ADD CONSTRAINT "ticket_type_event_id_fkey" FOREIGN KEY ("event_id") REFERENCES "event"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "inventory" ADD CONSTRAINT "inventory_time_slot_id_fkey" FOREIGN KEY ("time_slot_id") REFERENCES "time_slot"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "inventory" ADD CONSTRAINT "inventory_time_slot_id_fkey" FOREIGN KEY ("time_slot_id") REFERENCES "time_slot"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "inventory" ADD CONSTRAINT "inventory_ticket_type_id_fkey" FOREIGN KEY ("ticket_type_id") REFERENCES "ticket_type"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "inventory" ADD CONSTRAINT "inventory_ticket_type_id_fkey" FOREIGN KEY ("ticket_type_id") REFERENCES "ticket_type"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ticket" ADD CONSTRAINT "ticket_time_slot_id_fkey" FOREIGN KEY ("time_slot_id") REFERENCES "time_slot"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ticket" ADD CONSTRAINT "ticket_time_slot_id_fkey" FOREIGN KEY ("time_slot_id") REFERENCES "time_slot"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ticket" ADD CONSTRAINT "ticket_ticket_type_id_fkey" FOREIGN KEY ("ticket_type_id") REFERENCES "ticket_type"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ticket" ADD CONSTRAINT "ticket_ticket_type_id_fkey" FOREIGN KEY ("ticket_type_id") REFERENCES "ticket_type"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ticket" ADD CONSTRAINT "ticket_order_id_fkey" FOREIGN KEY ("order_id") REFERENCES "order"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -404,13 +454,13 @@ ALTER TABLE "ticket" ADD CONSTRAINT "ticket_eventId_fkey" FOREIGN KEY ("eventId"
 ALTER TABLE "cart" ADD CONSTRAINT "cart_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "cart_item" ADD CONSTRAINT "cart_item_cart_id_fkey" FOREIGN KEY ("cart_id") REFERENCES "cart"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "cart_item" ADD CONSTRAINT "cart_item_cart_id_fkey" FOREIGN KEY ("cart_id") REFERENCES "cart"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "cart_item" ADD CONSTRAINT "cart_item_time_slot_id_fkey" FOREIGN KEY ("time_slot_id") REFERENCES "time_slot"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "cart_item" ADD CONSTRAINT "cart_item_time_slot_id_fkey" FOREIGN KEY ("time_slot_id") REFERENCES "time_slot"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "cart_item" ADD CONSTRAINT "cart_item_ticket_type_id_fkey" FOREIGN KEY ("ticket_type_id") REFERENCES "ticket_type"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "cart_item" ADD CONSTRAINT "cart_item_ticket_type_id_fkey" FOREIGN KEY ("ticket_type_id") REFERENCES "ticket_type"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "order" ADD CONSTRAINT "order_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "order" ADD CONSTRAINT "order_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;

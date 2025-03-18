@@ -5,10 +5,10 @@ import {
   PayoutFrequency,
   Prisma,
   PrismaClient,
-  Role,
   TicketStatus,
   VerificationStatus,
 } from '@prisma/client';
+import { auth } from '@repo/auth/server';
 
 const prisma = new PrismaClient();
 
@@ -18,28 +18,38 @@ const users = [
     email: 'contact@soundwave.com',
     name: 'Soundwave Productions',
     emailVerified: true,
-    role: Role.ORGANIZER,
+    role: 'organizer',
+    organization: 'ticket-care',
   },
   {
     id: randomUUID(),
     email: 'events@sportsmaster.com',
     name: 'SportsMaster Events',
     emailVerified: true,
-    role: Role.ORGANIZER,
+    role: 'organizer',
+    organization: 'city-stadium',
   },
   {
     id: randomUUID(),
     email: 'john.doe@email.com',
     name: 'John Doe',
     emailVerified: true,
-    role: Role.CUSTOMER,
+    role: 'customer',
   },
   {
     id: randomUUID(),
     email: 'jane.smith@email.com',
     name: 'Jane Smith',
     emailVerified: true,
-    role: Role.CUSTOMER,
+    role: 'customer',
+  },
+  {
+    id: randomUUID(),
+    email: 'admin@ticketcare.com',
+    name: 'Admin',
+    emailVerified: true,
+    role: 'super_admin',
+    organization: 'ticket-care',
   },
 ];
 
@@ -49,7 +59,11 @@ async function main() {
 
   // Clean up existing data
   await prisma.$transaction([
+    prisma.inventory.deleteMany(),
+    prisma.timeSlot.deleteMany(),
     prisma.ticket.deleteMany(),
+    prisma.ticketType.deleteMany(),
+    prisma.eventDate.deleteMany(),
     prisma.order.deleteMany(),
     prisma.event.deleteMany(),
     prisma.venue.deleteMany(),
@@ -58,6 +72,23 @@ async function main() {
     prisma.session.deleteMany(),
     prisma.user.deleteMany(),
   ]);
+
+  // Create organization
+  const ticketCareOrg = await prisma.organization.create({
+    data: {
+      id: randomUUID(),
+      name: 'TicketCare',
+      slug: 'ticket-care',
+    },
+  });
+
+  const cityStadiumOrg = await prisma.organization.create({
+    data: {
+      id: randomUUID(),
+      name: 'City Stadium',
+      slug: 'city-stadium',
+    },
+  });
 
   // Create users
   for (const userData of users) {
@@ -71,7 +102,35 @@ async function main() {
       },
     });
 
-    console.info(`Created user: ${user.email}`);
+    // create account for password based login
+    const ctx = await auth.$context;
+    const hash = await ctx.password.hash('abcd1234');
+
+    await prisma.account.create({
+      data: {
+        id: randomUUID(),
+        accountId: user.id,
+        userId: user.id,
+        providerId: 'credential',
+        password: hash,
+      },
+    });
+
+    // Assign users to organizations
+    if (userData.organization) {
+      await prisma.member.create({
+        data: {
+          id: randomUUID(),
+          organizationId:
+            userData.organization === 'ticket-care'
+              ? ticketCareOrg.id
+              : cityStadiumOrg.id,
+          userId: user.id,
+          role: 'owner',
+          createdAt: new Date(),
+        },
+      });
+    }
   }
 
   // Create Organizers
@@ -518,7 +577,6 @@ async function main() {
     },
   });
 
-  // eslint-disable-next-line no-console
   console.info('Seeding complete!');
 }
 

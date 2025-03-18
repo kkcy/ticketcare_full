@@ -1,19 +1,47 @@
-import { stripeClient } from '@better-auth/stripe/client';
-import { adminClient, organizationClient } from 'better-auth/client/plugins';
+import {
+  adminClient,
+  magicLinkClient,
+  organizationClient,
+} from 'better-auth/client/plugins';
 import { createAuthClient } from 'better-auth/react';
+import {
+  adminRole,
+  customerRole,
+  organizerRole,
+  ownerRole,
+  superAdminRole,
+} from './permissions';
+import { ac } from './permissions';
 
-type AuthClient = ReturnType<
-  typeof createAuthClient<{
-    plugins: [
-      ReturnType<typeof adminClient>,
-      ReturnType<typeof stripeClient>,
-      //   ReturnType<typeof organizationClient>,
-    ];
-  }>
->;
+// type AuthClient = ReturnType<
+//   typeof createAuthClient<{
+//     plugins: [
+//       ReturnType<typeof adminClient>,
+//       // ReturnType<typeof stripeClient>,
+//       ReturnType<typeof magicLinkClient>,
+//       // ReturnType<typeof organizationClient>,
+//     ];
+//   }>
+// >;
 
-const authClient: AuthClient = createAuthClient({
-  plugins: [stripeClient(), adminClient(), organizationClient()],
+const authClient = createAuthClient({
+  plugins: [
+    // stripeClient(),
+    // customSessionClient<typeof auth>(),
+    adminClient({
+      ac,
+      roles: {
+        superAdmin: superAdminRole,
+        admin: adminRole,
+        customer: customerRole,
+      },
+    }),
+    organizationClient({
+      ac,
+      roles: { owner: ownerRole, organizer: organizerRole },
+    }),
+    magicLinkClient(),
+  ],
 });
 
 export const {
@@ -22,8 +50,7 @@ export const {
   signUp,
   useSession,
   admin,
-  // @ts-expect-error pending updates from better-auth for types
-  useActiveOrganization,
-  // @ts-expect-error pending updates from better-auth for types
   organization,
+  useActiveOrganization,
 } = authClient;
+export default authClient;
