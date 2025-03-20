@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { Header } from './components/header';
 
-const title = 'Acme Inc';
-const description = 'My application.';
+const title = 'TicketCare';
+const description = 'Your Ultimate Event Ticketing Solution';
 
 export const metadata: Metadata = {
   title,
