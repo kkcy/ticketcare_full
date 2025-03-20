@@ -85,7 +85,7 @@ CREATE TABLE "session" (
     "user_agent" TEXT,
     "user_id" TEXT NOT NULL,
     "impersonated_by" TEXT,
-    "activeOrganizationId" TEXT,
+    "active_organization_id" TEXT,
 
     CONSTRAINT "session_pkey" PRIMARY KEY ("id")
 );

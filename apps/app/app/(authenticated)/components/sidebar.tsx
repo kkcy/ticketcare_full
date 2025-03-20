@@ -1,12 +1,8 @@
 'use client';
-import {
-  clearActiveOrganization,
-  setActiveOrganization,
-} from '@/app/actions/active-organization';
 import { signOut, useActiveOrganization } from '@repo/auth/client';
 import { OrganizationSwitcher } from '@repo/auth/components/organization-switcher';
 import { UserButton } from '@repo/auth/components/user-button';
-import type { Organization, User } from '@repo/database';
+import type { User } from '@repo/database';
 import { ModeToggle } from '@repo/design-system/components/mode-toggle';
 import { Collapsible } from '@repo/design-system/components/ui/collapsible';
 import {
@@ -35,13 +31,13 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { type ReactNode, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { Search } from './search';
 
 type GlobalSidebarProperties = {
   user?: User;
   activeOrganizationId?: string;
-  activeOrganization?: Organization;
+  activeOrganizationName?: string;
   readonly children: ReactNode;
 };
 
@@ -95,34 +91,17 @@ const data = {
 
 export const GlobalSidebar = ({
   user,
-  activeOrganizationId,
-  activeOrganization,
+  activeOrganizationName,
   children,
 }: GlobalSidebarProperties) => {
   const sidebar = useSidebar();
   const { data: organization } = useActiveOrganization();
 
-  // if we have activeOrganizationId & not activeOrganization,
-  // setActiveOrganization for cookie persistent for future use
-  useEffect(() => {
-    if (activeOrganizationId && organization && !activeOrganization) {
-      setActiveOrganization({
-        id: organization.id,
-        name: organization.name,
-        slug: organization.slug,
-        logo: organization.logo,
-        createdAt: organization.createdAt,
-        metadata: organization.metadata,
-        chipApiKey: organization.chipApiKey,
-      });
-    }
-  }, [activeOrganizationId, activeOrganization, organization]);
-
   return (
     <>
       <Sidebar variant="inset">
         <SidebarHeader>
-          {(activeOrganization || organization) && (
+          {activeOrganizationName && (
             <SidebarMenu>
               <SidebarMenuItem>
                 <div
@@ -133,14 +112,8 @@ export const GlobalSidebar = ({
                 >
                   <OrganizationSwitcher
                     activeOrganization={
-                      activeOrganization || {
-                        id: organization?.id,
-                        name: organization?.name,
-                        slug: organization?.slug,
-                        logo: organization?.logo,
-                        createdAt: organization?.createdAt,
-                        metadata: organization?.metadata,
-                        chipApiKey: organization?.chipApiKey,
+                      organization || {
+                        name: activeOrganizationName,
                       }
                     }
                   />
@@ -199,7 +172,6 @@ export const GlobalSidebar = ({
                   signOut({
                     fetchOptions: {
                       onSuccess: () => {
-                        clearActiveOrganization();
                         redirect('/sign-in');
                       },
                     },

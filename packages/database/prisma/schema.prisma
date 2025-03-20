@@ -104,7 +104,9 @@ model Session {
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   impersonatedBy String?  @map("impersonated_by")
 
-  activeOrganizationId String?
+  activeOrganizationId   String? @map("active_organization_id")
+  activeOrganizationName String? @map("active_organization_name")
+  organizerId            String? @map("organizer_id")
 
   @@map("session")
 }

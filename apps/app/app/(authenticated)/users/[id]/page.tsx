@@ -25,7 +25,7 @@ import {
 import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import type { ReactElement } from 'react';
 
 type PageProps = {
@@ -39,8 +39,8 @@ async function getUser(id: string) {
     headers: await headers(),
   });
 
-  if (!session?.user) {
-    redirect('/');
+  if (!session?.user || !session?.session.organizerId) {
+    return notFound();
   }
 
   const user = await database.user.findUnique({
@@ -60,7 +60,7 @@ async function getUser(id: string) {
           tickets: {
             some: {
               event: {
-                organizerId: session.user.id,
+                organizerId: session.session.organizerId,
               },
             },
           },

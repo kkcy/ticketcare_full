@@ -8,8 +8,8 @@ export const getUsers = async () => {
     headers: await headers(),
   });
 
-  if (!session?.user) {
-    notFound();
+  if (!session?.user || !session?.session.organizerId) {
+    return notFound();
   }
 
   const users = await database.user
@@ -20,7 +20,7 @@ export const getUsers = async () => {
             tickets: {
               some: {
                 event: {
-                  organizerId: session.user.id,
+                  organizerId: session.session.organizerId,
                 },
               },
             },
@@ -40,7 +40,7 @@ export const getUsers = async () => {
                 tickets: {
                   some: {
                     event: {
-                      organizerId: session.user.id,
+                      organizerId: session.session.organizerId,
                     },
                   },
                 },

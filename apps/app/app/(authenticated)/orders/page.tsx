@@ -28,7 +28,7 @@ const OrdersPage = async () => {
     headers: await headers(),
   });
 
-  if (!session?.user) {
+  if (!session?.user || !session?.session.organizerId) {
     redirect('/');
   }
 
@@ -57,7 +57,7 @@ const OrdersPage = async () => {
         </div>
         <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min">
           <OrderTable
-            organizerId={session.user.id}
+            organizerId={session.session.organizerId}
             columns={columns}
             initialData={orders}
           />

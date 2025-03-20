@@ -11,7 +11,7 @@ import { headers } from 'next/headers';
 export async function createEvent(
   values: Omit<
     PrismaNamespace.EventCreateInput,
-    'slug' | 'organizer' | 'venue'
+    'slug' | 'organizer' | 'venue' | 'approvedBy'
   > & {
     venueId: bigint;
   }
@@ -22,6 +22,10 @@ export async function createEvent(
 
   if (!session) {
     throw new Error('Unauthorized');
+  }
+
+  if (!session.session?.organizerId) {
+    throw new Error('Not an organizer');
   }
 
   const slug = slugify(values.title);
@@ -38,7 +42,7 @@ export async function createEvent(
     data: {
       ...values,
       slug: finalSlug,
-      organizerId: session.user.id,
+      organizerId: session.session.organizerId,
     },
   });
 
@@ -54,7 +58,7 @@ export async function updateEvent(
   id: string,
   values: Omit<
     PrismaNamespace.EventUpdateInput,
-    'slug' | 'organizer' | 'venue'
+    'slug' | 'organizer' | 'venue' | 'approvedBy'
   > & {
     venueId: bigint;
   }

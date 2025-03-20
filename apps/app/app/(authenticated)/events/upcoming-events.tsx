@@ -10,15 +10,16 @@ import {
 } from '@repo/design-system/components/ui/card';
 import { CalendarIcon, ClockIcon, MapPinIcon } from 'lucide-react';
 import { headers } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 
 export const UpcomingEvents = async () => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
 
-  if (!session) {
-    redirect('/');
+  if (!session?.session?.organizerId) {
+    // should not happen. all app.ticketcare user is an organizer
+    return notFound();
   }
 
   const events = await database.event.findMany({
@@ -26,7 +27,7 @@ export const UpcomingEvents = async () => {
       startTime: {
         gte: new Date(),
       },
-      organizerId: session.user.id,
+      organizerId: session.session.organizerId,
     },
     include: {
       venue: true,

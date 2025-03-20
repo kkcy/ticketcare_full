@@ -28,8 +28,8 @@ const UsersPage = async (): Promise<ReactElement> => {
     headers: await headers(),
   });
 
-  if (!session?.user) {
-    notFound();
+  if (!session?.user || !session?.session.organizerId) {
+    return notFound();
   }
 
   const users = await getUsers();
@@ -55,7 +55,7 @@ const UsersPage = async (): Promise<ReactElement> => {
         </div>
         <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min">
           <UserTable
-            organizerId={session.user.id}
+            organizerId={session.session.organizerId}
             columns={columns}
             initialData={users}
           />

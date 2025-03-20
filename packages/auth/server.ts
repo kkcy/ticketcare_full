@@ -51,6 +51,25 @@ const options = {
   database: prismaAdapter(database, {
     provider: 'postgresql',
   }),
+  session: {
+    cookieCache: {
+      enabled: true,
+    },
+    additionalFields: {
+      activeOrganizationName: {
+        type: 'string',
+        required: false,
+        defaultValue: null,
+        input: false,
+      },
+      organizerId: {
+        type: 'string',
+        required: false,
+        defaultValue: null,
+        input: false,
+      },
+    },
+  },
   plugins: [
     magicLink({
       // biome-ignore lint/suspicious/useAwait: <explanation>
@@ -98,16 +117,9 @@ const options = {
     }),
     nextCookies(),
   ],
-} satisfies BetterAuthOptions;
-
-export const auth: ReturnType<typeof betterAuth<typeof options>> = betterAuth({
-  ...options,
-  plugins: [...(options.plugins ?? [])],
-  // hooks: {},
   databaseHooks: {
     session: {
       create: {
-        // @ts-expect-error
         before: async (context) => {
           try {
             const organizations = await database.organization.findMany({
@@ -120,11 +132,18 @@ export const auth: ReturnType<typeof betterAuth<typeof options>> = betterAuth({
               },
             });
 
+            const organizer = await database.organizer.findUnique({
+              where: {
+                userId: context.userId,
+              },
+            });
+
             return {
               data: {
                 ...context,
                 activeOrganizationId: organizations?.[0]?.id,
-                activeOrganization: organizations?.[0] || null,
+                activeOrganizationName: organizations?.[0]?.name,
+                organizerId: organizer?.id,
               },
             };
           } catch (error) {
@@ -141,11 +160,13 @@ export const auth: ReturnType<typeof betterAuth<typeof options>> = betterAuth({
   },
   onAPIError: {
     throw: true,
-    // @ts-expect-error
     onError: (error) => {
       // biome-ignore lint/suspicious/noConsole: <explanation>
       console.error('Auth error:', error);
     },
     errorURL: '/auth/error',
   },
-});
+} satisfies BetterAuthOptions;
+
+export const auth: ReturnType<typeof betterAuth<typeof options>> =
+  betterAuth(options);

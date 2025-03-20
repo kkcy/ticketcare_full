@@ -14,7 +14,7 @@ export {
   OrderStatus,
   Prisma as PrismaNamespace,
 } from '@prisma/client';
-export type { User, Organization } from '@prisma/client';
+export type { User, Organization, Organizer } from '@prisma/client';
 
 type SerializedPrisma<T> = T extends PrismaNamespace.Decimal
   ? number

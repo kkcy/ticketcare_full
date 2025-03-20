@@ -22,7 +22,7 @@ export async function getOrders() {
     headers: await headers(),
   });
 
-  if (!session?.user) {
+  if (!session?.user || !session.session.organizerId) {
     return notFound();
   }
 
@@ -32,7 +32,7 @@ export async function getOrders() {
         tickets: {
           every: {
             event: {
-              organizerId: session.user.id,
+              organizerId: session.session.organizerId,
             },
           },
         },

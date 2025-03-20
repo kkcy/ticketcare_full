@@ -19,7 +19,7 @@ const users = [
     name: 'Soundwave Productions',
     emailVerified: true,
     role: 'organizer',
-    organization: 'ticket-care',
+    organization: 'over-and-above',
   },
   {
     id: randomUUID(),
@@ -59,6 +59,7 @@ async function main() {
 
   // Clean up existing data
   await prisma.$transaction([
+    prisma.organization.deleteMany(),
     prisma.inventory.deleteMany(),
     prisma.timeSlot.deleteMany(),
     prisma.ticket.deleteMany(),
@@ -79,6 +80,14 @@ async function main() {
       id: randomUUID(),
       name: 'TicketCare',
       slug: 'ticket-care',
+    },
+  });
+
+  const overAndAboveOrg = await prisma.organization.create({
+    data: {
+      id: randomUUID(),
+      name: 'Over & Above',
+      slug: 'over-and-above',
     },
   });
 
@@ -122,8 +131,8 @@ async function main() {
         data: {
           id: randomUUID(),
           organizationId:
-            userData.organization === 'ticket-care'
-              ? ticketCareOrg.id
+            userData.organization === 'over-and-above'
+              ? overAndAboveOrg.id
               : cityStadiumOrg.id,
           userId: user.id,
           role: 'owner',
@@ -134,6 +143,24 @@ async function main() {
   }
 
   // Create Organizers
+  await prisma.organizer.create({
+    data: {
+      id: randomUUID(),
+      userId: users[4].id,
+      name: 'TicketCare',
+      slug: 'ticket-care',
+      description: 'TicketCare',
+      email: 'contact@ticketcare.com',
+      phone: '+1234567890',
+      verificationStatus: VerificationStatus.verified,
+      payoutFrequency: PayoutFrequency.monthly,
+      commissionRate: new Prisma.Decimal(10.0),
+      emailNotifications: true,
+      smsNotifications: true,
+      pushNotifications: true,
+    },
+  });
+
   const musicOrganizer = await prisma.organizer.create({
     data: {
       id: randomUUID(),
@@ -173,8 +200,8 @@ async function main() {
   // Create Venues
   const arena = await prisma.venue.create({
     data: {
-      name: 'Metropolitan Arena',
-      slug: 'metropolitan-arena',
+      name: 'Over And Above Club',
+      slug: 'over-and-above-club',
       description: 'State-of-the-art concert venue',
       address: '123 Main Street',
       city: 'New York',

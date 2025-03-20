@@ -93,7 +93,7 @@ export const OrganizationSwitcher = ({
   activeOrganization,
   className = '',
 }: {
-  activeOrganization: Organization;
+  activeOrganization: Partial<Organization>;
   className?: string;
 }) => {
   return (
@@ -105,12 +105,10 @@ export const OrganizationSwitcher = ({
     >
       <div className="flex items-center gap-2">
         <Avatar className="h-5 w-5">
-          {activeOrganization?.logo && (
-            <AvatarImage
-              src={activeOrganization.logo}
-              alt={activeOrganization?.name || ''}
-            />
-          )}
+          <AvatarImage
+            src={activeOrganization?.logo || ''}
+            alt={activeOrganization?.name || ''}
+          />
           <AvatarFallback className="bg-primary text-primary-foreground text-xs">
             {activeOrganization?.name?.charAt(0) || '?'}
           </AvatarFallback>
