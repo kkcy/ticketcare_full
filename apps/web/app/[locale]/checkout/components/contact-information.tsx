@@ -26,7 +26,6 @@ export const ContactInformation: FC = () => {
             <FormItem>
               <FormLabel className="text-gray-500 text-sm">Full Name</FormLabel>
               <FormControl>
-                'gray-500sm'
                 <Input
                   placeholder="Michella Barkin"
                   className="w-full p-2"
@@ -44,7 +43,7 @@ export const ContactInformation: FC = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-gray-500 text-sm">
-                Email Address'gray-500sm'
+                Email Address
               </FormLabel>
               <FormControl>
                 <Input
@@ -66,7 +65,7 @@ export const ContactInformation: FC = () => {
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormLabel className="text-gray-500 text-sm">
-                  Mobile Number'gray-500sm'
+                  Mobile Number
                 </FormLabel>
                 <FormControl>
                   <PhoneInput {...field} international defaultCountry="MY" />

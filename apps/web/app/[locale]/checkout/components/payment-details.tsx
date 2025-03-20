@@ -30,12 +30,10 @@ export const PaymentDetails: FC = () => {
         }
         className="flex flex-col gap-[16px] space-y-3"
       >
-        ' space-y-3'
         <ToggleGroupItem
           value="fpx"
           className="flex h-[64px] w-full items-center justify-between rounded-md border p-[16px] data-[state=on]:bg-orange-500 data-[state=on]:text-white"
         >
-          'flexw-full items-center justify-between rounded-md border '
           <span>FPX</span>
           <Image src="/fpx.png" alt="FPX" width={60} height={48} />
         </ToggleGroupItem>
@@ -43,7 +41,6 @@ export const PaymentDetails: FC = () => {
           value="card"
           className="flex h-[64px] w-full items-center justify-between rounded-md border p-[16px] data-[state=on]:bg-orange-500 data-[state=on]:text-white"
         >
-          'flexw-full items-center justify-between rounded-md border '
           <span>Credit/Debit Card</span>
           <Image src="/visa.png" alt="Visa" width={100} height={24} />
         </ToggleGroupItem>
@@ -51,7 +48,6 @@ export const PaymentDetails: FC = () => {
           value="wallet"
           className="flex h-[64px] w-full items-center justify-between rounded-md border p-[16px] data-[state=on]:bg-orange-500 data-[state=on]:text-white"
         >
-          'flexw-full items-center justify-between rounded-md border '
           <span>E-Wallet</span>
           <Image src="/wallet.png" alt="E-Wallet" width={80} height={24} />
         </ToggleGroupItem>
@@ -65,7 +61,7 @@ export const PaymentDetails: FC = () => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-gray-500 text-sm">
-                  Card Number'gray-500sm'
+                  Card Number
                 </FormLabel>
                 <FormControl>
                   <CardInput
@@ -87,7 +83,7 @@ export const PaymentDetails: FC = () => {
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormLabel className="text-gray-500 text-sm">
-                    Expiry Date'gray-500sm'
+                    Expiry Date
                   </FormLabel>
                   <FormControl>
                     <CardInput
@@ -109,7 +105,6 @@ export const PaymentDetails: FC = () => {
                 <FormItem className="flex-1">
                   <FormLabel className="text-gray-500 text-sm">CVV</FormLabel>
                   <FormControl>
-                    'gray-500sm'
                     <CardInput
                       type="cvv"
                       placeholder="123"

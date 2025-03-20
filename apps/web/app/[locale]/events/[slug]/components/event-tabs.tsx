@@ -2,7 +2,7 @@
 
 import type { SerializedEvent } from '@/app/types';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from '@repo/design-system/components/ui/form';
+import { FormProvider, useForm } from '@repo/design-system/components/ui/form';
 import {
   Tabs,
   TabsContent,
