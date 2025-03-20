@@ -30,7 +30,7 @@ import {
   UsersRoundIcon,
 } from 'lucide-react';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { Search } from './search';
 
@@ -96,6 +96,7 @@ export const GlobalSidebar = ({
 }: GlobalSidebarProperties) => {
   const sidebar = useSidebar();
   const { data: organization } = useActiveOrganization();
+  const router = useRouter();
 
   return (
     <>
@@ -172,11 +173,12 @@ export const GlobalSidebar = ({
                   signOut({
                     fetchOptions: {
                       onSuccess: () => {
-                        redirect('/sign-in');
+                        router.push('/sign-in');
                       },
                     },
                   });
                 }}
+                className="flex-1"
               />
               <div className="flex shrink-0 items-center gap-px">
                 <ModeToggle />

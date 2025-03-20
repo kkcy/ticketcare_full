@@ -65,7 +65,7 @@ export const UserButton = ({
             className
           )}
         >
-          <Avatar className="h-8 w-8">
+          <Avatar className="h-6 w-6">
             {currentUser.image && (
               <AvatarImage
                 src={currentUser.image}
@@ -78,7 +78,7 @@ export const UserButton = ({
           </Avatar>
 
           {showName && (
-            <span className="ml-2 font-medium">
+            <span className="overflow-hidden text-ellipsis font-medium">
               {currentUser.name || currentUser.email}
             </span>
           )}
