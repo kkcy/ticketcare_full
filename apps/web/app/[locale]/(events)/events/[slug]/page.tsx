@@ -1,5 +1,5 @@
 import { Separator } from '@repo/design-system/components/ui/separator';
-import { notFound } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import type { ReactElement } from 'react';
 import { getEvent } from './actions';
 import { EventCarousel } from './components/event-carousel';
@@ -21,7 +21,7 @@ export default async function EventPage({
   const event = await getEvent(slug);
 
   if (!event) {
-    notFound();
+    redirect('/');
   }
 
   return (

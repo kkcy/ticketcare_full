@@ -4,7 +4,6 @@ import { auth } from '@repo/auth/server';
 import { CartStatus, database, serializePrisma } from '@repo/database';
 import { revalidatePath } from 'next/cache';
 import { headers } from 'next/headers';
-import { notFound } from 'next/navigation';
 import { z } from 'zod';
 
 const createCartSchema = z.object({
@@ -16,37 +15,39 @@ const createCartSchema = z.object({
 export type CreateCartInput = z.infer<typeof createCartSchema>;
 
 export async function getEvent(slug: string) {
-  const event = await database.event.findUnique({
-    where: {
-      slug,
-    },
-    select: {
-      id: true,
-      slug: true,
-      title: true,
-      description: true,
-      startTime: true,
-      endTime: true,
-      eventDates: {
-        select: {
-          id: true,
-          date: true,
-          timeSlots: {
-            select: {
-              id: true,
-              startTime: true,
-              endTime: true,
-              doorsOpen: true,
-              inventory: {
-                select: {
-                  id: true,
-                  quantity: true,
-                  ticketType: {
-                    select: {
-                      id: true,
-                      name: true,
-                      description: true,
-                      price: true,
+  try {
+    const event = await database.event.findUnique({
+      where: {
+        slug,
+      },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        description: true,
+        startTime: true,
+        endTime: true,
+        eventDates: {
+          select: {
+            id: true,
+            date: true,
+            timeSlots: {
+              select: {
+                id: true,
+                startTime: true,
+                endTime: true,
+                doorsOpen: true,
+                inventory: {
+                  select: {
+                    id: true,
+                    quantity: true,
+                    ticketType: {
+                      select: {
+                        id: true,
+                        name: true,
+                        description: true,
+                        price: true,
+                      },
                     },
                   },
                 },
@@ -54,28 +55,30 @@ export async function getEvent(slug: string) {
             },
           },
         },
-      },
-      venue: {
-        select: {
-          name: true,
-          address: true,
+        venue: {
+          select: {
+            name: true,
+            address: true,
+          },
+        },
+        organizer: {
+          select: {
+            logo: true,
+            name: true,
+            slug: true,
+          },
         },
       },
-      organizer: {
-        select: {
-          logo: true,
-          name: true,
-          slug: true,
-        },
-      },
-    },
-  });
+    });
 
-  if (!event) {
-    return notFound();
+    if (!event) {
+      return null;
+    }
+
+    return serializePrisma(event);
+  } catch (_) {
+    return null;
   }
-
-  return serializePrisma(event);
 }
 
 export async function createCart(input: CreateCartInput) {
