@@ -1,25 +1,17 @@
 import { database, serializePrisma } from '@repo/database';
 import { Badge } from '@repo/design-system/components/ui/badge';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@repo/design-system/components/ui/breadcrumb';
+import {} from '@repo/design-system/components/ui/breadcrumb';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from '@repo/design-system/components/ui/card';
-import { Separator } from '@repo/design-system/components/ui/separator';
-import { SidebarTrigger } from '@repo/design-system/components/ui/sidebar';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { title } from 'radash';
 import type { ReactElement } from 'react';
+import { Header } from '../../components/header';
 
 type PageProps = {
   readonly params: Promise<{
@@ -119,23 +111,8 @@ export default async function OrderDetailPage({
 
   return (
     <>
-      <header className="flex h-16 shrink-0 items-center gap-2">
-        <div className="flex items-center gap-2 px-4">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/orders">Orders</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>{order.id}</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </header>
+      <Header pages={['Orders']} page={order.id} />
+
       <main className="flex-1 space-y-4 p-4 pt-6 lg:p-8">
         <div>
           <h2 className="font-semibold text-3xl tracking-tight">{`Order ${order.id}`}</h2>

@@ -1,13 +1,4 @@
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@repo/design-system/components/ui/breadcrumb';
-import { Separator } from '@repo/design-system/components/ui/separator';
-import { SidebarTrigger } from '@repo/design-system/components/ui/sidebar';
+import {} from '@repo/design-system/components/ui/breadcrumb';
 import {
   Tabs,
   TabsContent,
@@ -16,6 +7,7 @@ import {
 } from '@repo/design-system/components/ui/tabs';
 import type { Metadata } from 'next';
 import type { ReactElement } from 'react';
+import { Header } from '../../components/header';
 import { EventDialog } from '../components/EventDialog';
 import { getEvent } from './actions';
 import { EventReports } from './components/EventReports';
@@ -48,23 +40,8 @@ export default async function EventDetailPage({
 
   return (
     <>
-      <header className="flex h-16 shrink-0 items-center gap-2">
-        <div className="flex items-center gap-2 px-4">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/events">Events</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>{event.title}</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </header>
+      <Header pages={['Events']} page={event.title} />
+
       <main className="flex-1 space-y-4 p-4 pt-6 md:p-8">
         <div className="flex items-center justify-between space-y-2">
           <h2 className="font-bold text-3xl tracking-tight">{event.title}</h2>
