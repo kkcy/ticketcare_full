@@ -2,12 +2,15 @@ import type { SerializedEvent } from '@/app/types';
 import { Alert } from '@repo/design-system/components/ui/alert';
 import { Button } from '@repo/design-system/components/ui/button';
 import {
+  type Control,
+  useController,
+} from '@repo/design-system/components/ui/form';
+import {
   ToggleGroup,
   ToggleGroupItem,
 } from '@repo/design-system/components/ui/toggle-group';
 import { Minus, Plus, Ticket } from 'lucide-react';
 import { AlertCircle } from 'lucide-react';
-import { type Control, useController } from 'react-hook-form';
 import type { TicketFormValues } from './event-pricing';
 
 interface StepProps {

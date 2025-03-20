@@ -2,8 +2,8 @@
 
 import type { SerializedCart } from '@/app/types';
 import { Button } from '@repo/design-system/components/ui/button';
+import { useFormContext } from '@repo/design-system/components/ui/form';
 import { ArrowRight } from 'lucide-react';
-import { useFormContext } from 'react-hook-form';
 
 interface CheckoutFooterProps {
   cart: SerializedCart;

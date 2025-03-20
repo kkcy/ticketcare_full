@@ -14,6 +14,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  useForm,
 } from '@repo/design-system/components/ui/form';
 import { Input } from '@repo/design-system/components/ui/input';
 import {
@@ -30,7 +31,6 @@ import { useDebounce } from '@repo/design-system/hooks/use-debounce';
 import { urlSerialize } from '@repo/design-system/lib/utils';
 import { title } from 'radash';
 import { useMemo, useState } from 'react';
-import { useForm } from 'react-hook-form';
 import useSWR from 'swr';
 import { createEvent, updateEvent } from './actions';
 

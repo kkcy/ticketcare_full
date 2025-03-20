@@ -1,9 +1,9 @@
 'use client';
 
 import { Button } from '@repo/design-system/components/ui/button';
+import { useFormContext } from '@repo/design-system/components/ui/form';
 import { ArrowRight, Heart, Share2 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useFormContext } from 'react-hook-form';
 import type { TicketFormValues } from './event-pricing';
 
 export function EventFooter() {

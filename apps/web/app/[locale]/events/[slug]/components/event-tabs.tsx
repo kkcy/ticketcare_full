@@ -2,6 +2,7 @@
 
 import type { SerializedEvent } from '@/app/types';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from '@repo/design-system/components/ui/form';
 import {
   Tabs,
   TabsContent,
@@ -9,7 +10,6 @@ import {
   TabsTrigger,
 } from '@repo/design-system/components/ui/tabs';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { FormProvider, useForm } from 'react-hook-form';
 import { createCart } from '../actions';
 import { EventAbout } from './event-about';
 import { EventFooter } from './event-footer';

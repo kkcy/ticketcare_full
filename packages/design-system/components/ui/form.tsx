@@ -165,3 +165,5 @@ export {
   FormMessage,
   FormField,
 }
+
+export * from 'react-hook-form';

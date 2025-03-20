@@ -8,13 +8,13 @@ import {
   FormLabel,
   FormMessage,
 } from '@repo/design-system/components/ui/form';
+import { useFormContext } from '@repo/design-system/components/ui/form';
 import {
   ToggleGroup,
   ToggleGroupItem,
 } from '@repo/design-system/components/ui/toggle-group';
 import Image from 'next/image';
 import type { FC } from 'react';
-import { useFormContext } from 'react-hook-form';
 
 export const PaymentDetails: FC = () => {
   const form = useFormContext();

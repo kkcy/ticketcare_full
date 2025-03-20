@@ -3,10 +3,10 @@
 import type { SerializedCart } from '@/app/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Checkbox } from '@repo/design-system/components/ui/checkbox';
+import { Form } from '@repo/design-system/components/ui/form';
 import { Separator } from '@repo/design-system/components/ui/separator';
 import { toast } from '@repo/design-system/components/ui/sonner';
 import Link from 'next/link';
-import { FormProvider, useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { checkout } from '../actions';
 import { CheckoutFooter } from './checkout-footer';
@@ -90,7 +90,7 @@ export function CheckoutForm({ cart }: CheckoutFormProps) {
   };
 
   return (
-    <FormProvider {...methods}>
+    <Form {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)} className="w-full">
         <div className="mt-[106px] mb-16 space-y-8 p-4">
           <OrderSummary cart={cart} />
@@ -150,6 +150,6 @@ export function CheckoutForm({ cart }: CheckoutFormProps) {
           <CheckoutFooter cart={cart} />
         </div>
       </form>
-    </FormProvider>
+    </Form>
   );
 }

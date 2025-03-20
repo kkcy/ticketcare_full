@@ -6,11 +6,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  useFormContext,
 } from '@repo/design-system/components/ui/form';
 import { Input } from '@repo/design-system/components/ui/input';
 import { PhoneInput } from '@repo/design-system/components/ui/phone-input';
 import type { FC } from 'react';
-import { useFormContext } from 'react-hook-form';
 
 export const ContactInformation: FC = () => {
   const form = useFormContext();
