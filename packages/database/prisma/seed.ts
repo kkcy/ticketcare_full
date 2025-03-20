@@ -133,7 +133,9 @@ async function main() {
           organizationId:
             userData.organization === 'over-and-above'
               ? overAndAboveOrg.id
-              : cityStadiumOrg.id,
+              : userData.organization === 'city-stadium'
+                ? cityStadiumOrg.id
+                : ticketCareOrg.id,
           userId: user.id,
           role: 'owner',
           createdAt: new Date(),
