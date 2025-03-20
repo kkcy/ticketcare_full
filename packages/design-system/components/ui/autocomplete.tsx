@@ -27,6 +27,7 @@ interface AutoCompleteProps<T extends string | number> {
   onSearchValueChange: (value: string) => void
   items: { value: T; label: string }[]
   isLoading?: boolean
+  showSearchIcon?: boolean
   emptyMessage?: string | React.ReactNode
   placeholder?: string
   className?: string
@@ -40,6 +41,7 @@ function Autocomplete<T extends string | number>({
   onSearchValueChange,
   items,
   isLoading,
+  showSearchIcon = true,
   emptyMessage = 'No items.',
   placeholder = 'Search...',
   className,
@@ -89,7 +91,7 @@ function Autocomplete<T extends string | number>({
       <Command shouldFilter={false}>
         <PopoverAnchor asChild>
           <CommandInput
-            showSearchIcon={false}
+            showSearchIcon={showSearchIcon}
             asChild
             value={searchValue}
             onValueChange={onSearchValueChange}

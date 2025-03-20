@@ -3,6 +3,7 @@
 import { auth } from '@repo/auth/server';
 import { CartStatus, database, serializePrisma } from '@repo/database';
 import { revalidatePath } from 'next/cache';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { z } from 'zod';
 
@@ -78,17 +79,19 @@ export async function getEvent(slug: string) {
 }
 
 export async function createCart(input: CreateCartInput) {
-  const session = await auth.api.getSession({});
-  const attendeeId = session?.user?.id || null;
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  const userId = session?.user?.id || null;
 
   try {
     const { timeSlotId, ticketTypeId, quantity } =
       createCartSchema.parse(input);
 
-    // Find existing active cart based on attendeeId or session
+    // Find existing active cart based on userId or session
     let cart = await database.cart.findFirst({
       where: {
-        userId: attendeeId,
+        userId: userId,
         status: CartStatus.active,
         expiresAt: {
           gt: new Date(),
@@ -108,7 +111,7 @@ export async function createCart(input: CreateCartInput) {
       // Create new cart
       cart = await database.cart.create({
         data: {
-          userId: attendeeId,
+          userId: userId,
           status: CartStatus.active,
           expiresAt: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes from now
         },

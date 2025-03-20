@@ -99,7 +99,7 @@ export const OrganizationSwitcher = ({
   return (
     <div
       className={cn(
-        'flex w-full items-center justify-between gap-2 px-2',
+        'flex h-full w-full items-center justify-between gap-2 px-2',
         className
       )}
     >

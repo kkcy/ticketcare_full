@@ -55,18 +55,21 @@ function CommandDialog({
 
 function CommandInput({
   className,
+  showSearchIcon = true,
   ...props
-}: React.ComponentProps<typeof CommandPrimitive.Input>) {
+}: React.ComponentProps<typeof CommandPrimitive.Input> & {
+  showSearchIcon?: boolean
+}) {
   return (
     <div
       data-slot="command-input-wrapper"
-      className="flex h-9 items-center gap-2 border-b px-3"
+      className="flex items-center gap-2 px-3 py-1"
     >
-      <SearchIcon className="size-4 shrink-0 opacity-50" />
+      {showSearchIcon && <SearchIcon className="size-4 shrink-0 opacity-50" />}
       <CommandPrimitive.Input
         data-slot="command-input"
         className={cn(
-          "placeholder:text-muted-foreground flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
+          "placeholder:text-muted-foreground flex h-9 w-full rounded-md bg-transparent py-3 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
           className
         )}
         {...props}
@@ -97,7 +100,7 @@ function CommandEmpty({
   return (
     <CommandPrimitive.Empty
       data-slot="command-empty"
-      className="py-6 text-center text-sm"
+      className="p-6 w-full text-center text-sm"
       {...props}
     />
   )
@@ -164,6 +167,21 @@ function CommandShortcut({
   )
 }
 
+function CommandLoading({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
+  return (
+    <CommandPrimitive.Loading
+      data-slot="command-loading"
+      className={cn(
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
 export {
   Command,
   CommandDialog,
@@ -174,4 +192,5 @@ export {
   CommandItem,
   CommandShortcut,
   CommandSeparator,
+  CommandLoading,
 }

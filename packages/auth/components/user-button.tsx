@@ -85,7 +85,7 @@ export const UserButton = ({
           <span className="sr-only">Open user menu</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent align="start" sideOffset={12} className="w-56">
         <div className="flex items-center gap-2 p-2">
           <Avatar className="h-10 w-10">
             {currentUser.image && (
