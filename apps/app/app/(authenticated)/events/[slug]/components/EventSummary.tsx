@@ -1,6 +1,16 @@
 import type { SerializedEvent } from '@/types';
-import { Activity, CalendarDays, Info, MapPin } from 'lucide-react';
+import {
+  Activity,
+  CalendarDays,
+  Image as ImageIcon,
+  Images,
+  Info,
+  MapPin,
+} from 'lucide-react';
+import Image from 'next/image';
 import { title } from 'radash';
+import { CarouselImagesDialog } from '../../components/CarouselImagesDialog';
+import { HeroImageDialog } from '../../components/HeroImageDialog';
 import { ShareButtons } from './ShareButtons';
 
 interface EventSummaryProps {
@@ -48,6 +58,70 @@ export function EventSummary({ event }: EventSummaryProps) {
           </p>
         </div>
       </div>
+
+      <div className="rounded-lg border p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <ImageIcon className="h-4 w-4 text-muted-foreground" />
+            <h3 className="font-semibold">Hero Image</h3>
+          </div>
+          <HeroImageDialog event={event} />
+        </div>
+        <div className="mt-4">
+          {event.heroImageUrl ? (
+            <div className="relative h-60 w-full overflow-hidden rounded-md">
+              <Image
+                src={event.heroImageUrl}
+                alt={event.title}
+                fill
+                className="object-cover"
+              />
+            </div>
+          ) : (
+            <div className="flex h-60 w-full items-center justify-center rounded-md border border-dashed">
+              <p className="text-muted-foreground text-sm">
+                No hero image available
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="rounded-lg border p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Images className="h-4 w-4 text-muted-foreground" />
+            <h3 className="font-semibold">Carousel Images</h3>
+          </div>
+          <CarouselImagesDialog event={event} />
+        </div>
+        <div className="mt-4">
+          {event.carouselImageUrls && event.carouselImageUrls.length > 0 ? (
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+              {event.carouselImageUrls.map((imageUrl, index) => (
+                <div
+                  key={index}
+                  className="relative h-40 overflow-hidden rounded-md"
+                >
+                  <Image
+                    src={imageUrl}
+                    alt={`${event.title} carousel image ${index + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex h-40 w-full items-center justify-center rounded-md border border-dashed">
+              <p className="text-muted-foreground text-sm">
+                No carousel images available
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
       <ShareButtons event={event} />
     </div>
   );

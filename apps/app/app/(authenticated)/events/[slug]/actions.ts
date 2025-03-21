@@ -24,6 +24,8 @@ export async function getEvent(slug: string) {
       refundPolicy: true,
       category: true,
       venueId: true,
+      heroImageUrl: true,
+      carouselImageUrls: true,
       venue: { select: { name: true } },
       ticketTypes: {
         select: {

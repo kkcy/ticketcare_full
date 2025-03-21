@@ -26,7 +26,6 @@ import {
 import { toast } from '@repo/design-system/components/ui/sonner';
 import { Textarea } from '@repo/design-system/components/ui/textarea';
 import { title } from 'radash';
-import { useState } from 'react';
 import { createEvent, updateEvent } from './actions';
 import { VenueAutocomplete } from './components/VenueAutocomplete';
 
@@ -54,7 +53,6 @@ interface EventFormProps {
 const eventCategories = ['music', 'sports', 'tech', 'art', 'film', 'food'];
 
 export function EventForm({ setOpen, mode = 'create', event }: EventFormProps) {
-
   const form = useForm<EventFormValues>({
     defaultValues: event
       ? {
@@ -112,8 +110,10 @@ export function EventForm({ setOpen, mode = 'create', event }: EventFormProps) {
       }
       setOpen?.(false);
     } catch (error) {
-      console.error(error);
-      toast.error('Something went wrong');
+      const errorMessage =
+        error instanceof Error ? error.message : 'Something went wrong';
+
+      toast.error(errorMessage);
     }
   }
 
