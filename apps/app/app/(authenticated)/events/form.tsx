@@ -1,9 +1,7 @@
 'use client';
 
 import type { SerializedEvent } from '@/types';
-import { useSession } from '@repo/auth/client';
-import type { EventStatus, PrismaNamespace } from '@repo/database';
-import { Autocomplete } from '@repo/design-system/components/ui/autocomplete';
+import type { EventStatus } from '@repo/database';
 import { Button } from '@repo/design-system/components/ui/button';
 import { DatetimePicker } from '@repo/design-system/components/ui/datetime-picker';
 import {
@@ -27,19 +25,10 @@ import {
 } from '@repo/design-system/components/ui/multi-select';
 import { toast } from '@repo/design-system/components/ui/sonner';
 import { Textarea } from '@repo/design-system/components/ui/textarea';
-import { useDebounce } from '@repo/design-system/hooks/use-debounce';
-import { urlSerialize } from '@repo/design-system/lib/utils';
 import { title } from 'radash';
-import { useMemo, useState } from 'react';
-import useSWR from 'swr';
+import { useState } from 'react';
 import { createEvent, updateEvent } from './actions';
-
-type PrismaVenue = PrismaNamespace.VenueGetPayload<{
-  select: {
-    id: true;
-    name: true;
-  };
-}>;
+import { VenueAutocomplete } from './components/VenueAutocomplete';
 
 interface EventFormValues {
   title: string;
@@ -65,22 +54,6 @@ interface EventFormProps {
 const eventCategories = ['music', 'sports', 'tech', 'art', 'film', 'food'];
 
 export function EventForm({ setOpen, mode = 'create', event }: EventFormProps) {
-  const session = useSession();
-  const [searchValue, setSearchValue] = useState<string>('');
-  const [debouncedQuery] = useDebounce(searchValue, 300);
-  const {
-    data: { data: venues } = {},
-    isLoading,
-  } = useSWR<{
-    data: PrismaVenue[];
-  }>(urlSerialize('/api/venues', { query: debouncedQuery }));
-
-  const venuesOptions = useMemo(() => {
-    return venues?.map((venue) => ({
-      value: Number(venue.id),
-      label: venue.name,
-    }));
-  }, [venues]);
 
   const form = useForm<EventFormValues>({
     defaultValues: event
@@ -192,19 +165,7 @@ export function EventForm({ setOpen, mode = 'create', event }: EventFormProps) {
               <FormItem className="flex flex-col">
                 <FormLabel>Venue</FormLabel>
                 <FormControl>
-                  <Autocomplete
-                    selectedValue={field.value ?? -1}
-                    onSelectedValueChange={(v) => {
-                      field.onChange(v);
-                    }}
-                    searchValue={searchValue}
-                    onSearchValueChange={setSearchValue}
-                    items={venuesOptions ?? []}
-                    isLoading={isLoading}
-                    emptyMessage="No venues found."
-                    className="w-full"
-                    {...field}
-                  />
+                  <VenueAutocomplete {...field} value={String(field.value)} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
