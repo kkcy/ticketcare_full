@@ -4,9 +4,17 @@ import { z } from 'zod';
 export const keys = () =>
   createEnv({
     server: {
-      BLOB_READ_WRITE_TOKEN: z.string().min(1).optional(),
+      // Backblaze credentials
+      B2_REGION: z.string().min(1),
+      B2_ACCESS_KEY_ID: z.string().min(1),
+      B2_SECRET_ACCESS_KEY: z.string().min(1),
+      B2_BUCKET_NAME: z.string().min(1),
     },
     runtimeEnv: {
-      BLOB_READ_WRITE_TOKEN: process.env.BLOB_READ_WRITE_TOKEN,
+      // Backblaze credentials
+      B2_REGION: process.env.B2_REGION,
+      B2_ACCESS_KEY_ID: process.env.B2_ACCESS_KEY_ID,
+      B2_SECRET_ACCESS_KEY: process.env.B2_SECRET_ACCESS_KEY,
+      B2_BUCKET_NAME: process.env.B2_BUCKET_NAME,
     },
   });

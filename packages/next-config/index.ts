@@ -9,7 +9,13 @@ const otelRegex = /@opentelemetry\/instrumentation/;
 export const config: NextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
-    remotePatterns: [],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'ticketcare.s3.eu-central-003.backblazeb2.com',
+        pathname: '/**',
+      },
+    ],
   },
 
   // biome-ignore lint/suspicious/useAwait: rewrites is async

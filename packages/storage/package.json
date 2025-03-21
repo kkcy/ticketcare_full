@@ -7,8 +7,9 @@
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "3.726.1",
+    "@aws-sdk/s3-request-presigner": "3.726.1",
     "@t3-oss/env-nextjs": "^0.12.0",
-    "@vercel/blob": "^0.27.2",
     "zod": "^3.24.2"
   },
   "devDependencies": {
