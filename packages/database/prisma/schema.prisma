@@ -229,6 +229,9 @@ model Event {
   updatedAt          DateTime     @updatedAt @map("updated_at")
   eventDates         EventDate[]
 
+  heroImageUrl      String?  @map("hero_image_url")
+  carouselImageUrls String[] @map("carousel_image_urls")
+
   @@index([organizerId])
   @@index([approvedById])
   @@map("event")
