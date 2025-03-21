@@ -10,6 +10,7 @@ import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { PostHogIdentifier } from './components/posthog-identifier';
 import { GlobalSidebar } from './components/sidebar';
+import { SWRProvider } from './components/swr';
 
 type AppLayoutProperties = {
   readonly children: ReactNode;
@@ -36,22 +37,24 @@ const AppLayout = async ({ children }: AppLayoutProperties) => {
   const activeOrganizationName = session.session.activeOrganizationName;
 
   return (
-    <NotificationsProvider userId={user.id}>
-      <SidebarProvider>
-        <GlobalSidebar
-          user={user as User}
-          activeOrganizationName={activeOrganizationName ?? undefined}
-        >
-          {betaFeature && (
-            <div className="m-4 rounded-full bg-blue-500 p-1.5 text-center text-sm text-white">
-              Beta feature now available
-            </div>
-          )}
-          {children}
-        </GlobalSidebar>
-        <PostHogIdentifier />
-      </SidebarProvider>
-    </NotificationsProvider>
+    <SWRProvider>
+      <NotificationsProvider userId={user.id}>
+        <SidebarProvider>
+          <GlobalSidebar
+            user={user as User}
+            activeOrganizationName={activeOrganizationName ?? undefined}
+          >
+            {betaFeature && (
+              <div className="m-4 rounded-full bg-blue-500 p-1.5 text-center text-sm text-white">
+                Beta feature now available
+              </div>
+            )}
+            {children}
+          </GlobalSidebar>
+          <PostHogIdentifier />
+        </SidebarProvider>
+      </NotificationsProvider>
+    </SWRProvider>
   );
 };
 
