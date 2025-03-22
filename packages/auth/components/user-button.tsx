@@ -60,7 +60,7 @@ export const UserButton = ({
         <Button
           variant="ghost"
           className={cn(
-            'flex h-8 w-8 items-center justify-center rounded-full p-0',
+            'flex h-8 w-8 items-center justify-start rounded-full p-0',
             showName && 'w-auto px-2',
             className
           )}
