@@ -10,6 +10,7 @@ import {
 } from '@repo/design-system/components/ui/card';
 import { CalendarIcon, ClockIcon, MapPinIcon } from 'lucide-react';
 import { headers } from 'next/headers';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 export const UpcomingEvents = async () => {
@@ -32,6 +33,9 @@ export const UpcomingEvents = async () => {
     include: {
       venue: true,
     },
+    orderBy: {
+      startTime: 'desc',
+    },
   });
 
   if (events.length === 0) {
@@ -48,28 +52,30 @@ export const UpcomingEvents = async () => {
   return (
     <div className="grid min-h-[100vh] flex-1 auto-rows-min gap-4 md:min-h-min lg:grid-cols-3">
       {events.map((event) => (
-        <Card key={event.id} className="transition-shadow hover:shadow-md">
-          <CardHeader className="font-semibold text-lg">
-            <CardTitle>{event.title}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1 text-sm">
-            <p className="flex items-center">
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {event.startTime.toISOString().split('T')[0]}
-            </p>
-            <p className="flex items-center">
-              <ClockIcon className="mr-2 h-4 w-4" />
-              {event.startTime.toISOString().split('T')[1]}
-            </p>
-            <p className="flex items-center">
-              <MapPinIcon className="mr-2 h-4 w-4" />
-              {event.venue.name}
-            </p>
-          </CardContent>
-          <CardFooter>
-            <CardDescription>{event.description}</CardDescription>
-          </CardFooter>
-        </Card>
+        <Link key={event.id} href={`/events/${event.slug}`}>
+          <Card className="transition-shadow hover:shadow-md">
+            <CardHeader className="font-semibold text-lg">
+              <CardTitle>{event.title}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1 text-sm">
+              <p className="flex items-center">
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {event.startTime.toISOString().split('T')[0]}
+              </p>
+              <p className="flex items-center">
+                <ClockIcon className="mr-2 h-4 w-4" />
+                {event.startTime.toISOString().split('T')[1]}
+              </p>
+              <p className="flex items-center">
+                <MapPinIcon className="mr-2 h-4 w-4" />
+                {event.venue.name}
+              </p>
+            </CardContent>
+            <CardFooter>
+              <CardDescription>{event.description}</CardDescription>
+            </CardFooter>
+          </Card>
+        </Link>
       ))}
     </div>
   );
