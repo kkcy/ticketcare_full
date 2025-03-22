@@ -215,7 +215,7 @@ export function EventForm({ setOpen, mode = 'create', event }: EventFormProps) {
                 <DatetimePicker
                   {...field}
                   format={[
-                    ['months', 'days', 'years'],
+                    ['days', 'months', 'years'],
                     ['hours', 'minutes', 'am/pm'],
                   ]}
                 />
@@ -234,7 +234,7 @@ export function EventForm({ setOpen, mode = 'create', event }: EventFormProps) {
                 <DatetimePicker
                   {...field}
                   format={[
-                    ['months', 'days', 'years'],
+                    ['days', 'months', 'years'],
                     ['hours', 'minutes', 'am/pm'],
                   ]}
                 />

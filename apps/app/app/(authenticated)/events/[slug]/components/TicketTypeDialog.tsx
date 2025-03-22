@@ -207,7 +207,7 @@ export function TicketTypeDialog({ event }: TicketTypeDialogProps) {
                       <DatetimePicker
                         {...field}
                         format={[
-                          ['months', 'days', 'years'],
+                          ['days', 'months', 'years'],
                           ['hours', 'minutes', 'am/pm'],
                         ]}
                       />
@@ -228,7 +228,7 @@ export function TicketTypeDialog({ event }: TicketTypeDialogProps) {
                       <DatetimePicker
                         {...field}
                         format={[
-                          ['months', 'days', 'years'],
+                          ['days', 'months', 'years'],
                           ['hours', 'minutes', 'am/pm'],
                         ]}
                       />
