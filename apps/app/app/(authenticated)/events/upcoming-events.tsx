@@ -1,6 +1,12 @@
 import { auth } from '@repo/auth/server';
 import { database } from '@repo/database';
 import {
+  CalendarIcon,
+  ClockIcon,
+  MapPinIcon,
+  StarIcon,
+} from '@repo/design-system/components/icons';
+import {
   Card,
   CardContent,
   CardDescription,
@@ -8,7 +14,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@repo/design-system/components/ui/card';
-import { CalendarIcon, ClockIcon, MapPinIcon } from 'lucide-react';
 import { headers } from 'next/headers';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';

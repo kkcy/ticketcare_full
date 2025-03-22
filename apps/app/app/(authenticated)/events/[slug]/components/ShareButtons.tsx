@@ -1,6 +1,7 @@
 'use client';
 
 import type { SerializedEvent } from '@/types';
+import { Copy, Facebook, XIcon } from '@repo/design-system/components/icons';
 import { Button } from '@repo/design-system/components/ui/button';
 import {
   Tooltip,
@@ -8,7 +9,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@repo/design-system/components/ui/tooltip';
-import { Copy, Facebook, XIcon } from 'lucide-react';
 
 interface ShareButtonsProps {
   event: SerializedEvent;

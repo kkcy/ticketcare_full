@@ -1,6 +1,7 @@
 'use client';
 
 import type { SerializedEvent } from '@/types';
+import { Loader2 } from '@repo/design-system/components/icons';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@repo/design-system/components/ui/select';
-import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { updateEventStatus } from '../actions';
 

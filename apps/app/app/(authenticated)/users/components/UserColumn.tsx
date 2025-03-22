@@ -1,9 +1,9 @@
 'use client';
 
 import type { SerializedUser } from '@/types';
+import { ArrowUpDown } from '@repo/design-system/components/icons';
 import { Button } from '@repo/design-system/components/ui/button';
 import type { ColumnDef } from '@tanstack/react-table';
-import { ArrowUpDown } from 'lucide-react';
 
 export const columns: ColumnDef<SerializedUser>[] = [
   {

@@ -6,7 +6,8 @@ import {
   Images,
   Info,
   MapPin,
-} from 'lucide-react';
+  TicketIcon,
+} from '@repo/design-system/components/icons';
 import Image from 'next/image';
 import { title } from 'radash';
 import { CarouselImagesDialog } from '../../components/CarouselImagesDialog';

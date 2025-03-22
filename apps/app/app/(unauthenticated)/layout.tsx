@@ -1,7 +1,7 @@
 import { env } from '@/env';
 import { auth } from '@repo/auth/server';
+import { CommandIcon } from '@repo/design-system/components/icons';
 import { ModeToggle } from '@repo/design-system/components/mode-toggle';
-import { CommandIcon } from 'lucide-react';
 import { headers } from 'next/headers';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';

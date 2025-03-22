@@ -3,6 +3,15 @@ import { signOut, useActiveOrganization } from '@repo/auth/client';
 import { OrganizationSwitcher } from '@repo/auth/components/organization-switcher';
 import { UserButton } from '@repo/auth/components/user-button';
 import type { User } from '@repo/database';
+import {
+  AnchorIcon,
+  CalendarIcon,
+  LifeBuoyIcon,
+  SendIcon,
+  Settings2Icon,
+  ShoppingBagIcon,
+  UsersRoundIcon,
+} from '@repo/design-system/components/icons';
 import { ModeToggle } from '@repo/design-system/components/mode-toggle';
 import { Collapsible } from '@repo/design-system/components/ui/collapsible';
 import {
@@ -20,15 +29,6 @@ import {
   useSidebar,
 } from '@repo/design-system/components/ui/sidebar';
 import { cn } from '@repo/design-system/lib/utils';
-import {
-  AnchorIcon,
-  CalendarIcon,
-  LifeBuoyIcon,
-  SendIcon,
-  Settings2Icon,
-  ShoppingBagIcon,
-  UsersRoundIcon,
-} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';

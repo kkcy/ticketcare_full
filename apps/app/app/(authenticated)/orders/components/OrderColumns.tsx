@@ -2,12 +2,12 @@
 
 import type { SerializedOrder } from '@/types';
 import type { OrderStatus } from '@repo/database';
+import { ArrowUpDown } from '@repo/design-system/components/icons';
 import { Badge } from '@repo/design-system/components/ui/badge';
 import { Button } from '@repo/design-system/components/ui/button';
 import type { ColumnDef } from '@tanstack/react-table';
 import { format } from 'date-fns';
 import Decimal from 'decimal.js';
-import { ArrowUpDown } from 'lucide-react';
 import { first, title } from 'radash';
 
 export const columns: ColumnDef<SerializedOrder>[] = [

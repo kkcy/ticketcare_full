@@ -2,6 +2,7 @@
 
 import { env } from '@/env';
 import type { SerializedEvent } from '@/types';
+import { Pencil, Upload } from '@repo/design-system/components/icons';
 import { Button } from '@repo/design-system/components/ui/button';
 import {
   Dialog,
@@ -29,7 +30,6 @@ import {
 import { Label } from '@repo/design-system/components/ui/label';
 import { toast } from '@repo/design-system/components/ui/sonner';
 import { useMediaQuery } from '@repo/design-system/hooks/use-media-query';
-import { Pencil, Upload } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
 import type { ChangeEvent } from 'react';

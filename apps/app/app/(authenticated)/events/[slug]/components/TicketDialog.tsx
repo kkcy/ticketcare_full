@@ -1,6 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Plus } from '@repo/design-system/components/icons';
 import { Button } from '@repo/design-system/components/ui/button';
 import {
   Dialog,
@@ -22,7 +23,6 @@ import {
   useForm,
 } from '@repo/design-system/components/ui/form';
 import { Input } from '@repo/design-system/components/ui/input';
-import { Plus } from 'lucide-react';
 import { z } from 'zod';
 import { createTicket } from '../actions';
 
