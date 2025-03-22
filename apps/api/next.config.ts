@@ -1,10 +1,10 @@
 import { env } from '@/env';
-import { config, withAnalyzer, withCors } from '@repo/next-config';
+import { config, withAnalyzer } from '@repo/next-config';
 import { withLogging, withSentry } from '@repo/observability/next-config';
 import type { NextConfig } from 'next';
 
 // Apply CORS headers to all API routes
-let nextConfig: NextConfig = withCors(withLogging(config));
+let nextConfig: NextConfig = withLogging(config);
 
 if (env.VERCEL) {
   nextConfig = withSentry(nextConfig);
