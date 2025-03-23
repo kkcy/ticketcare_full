@@ -1,3 +1,5 @@
+import { StarIcon } from '@repo/design-system/components/icons';
+import { Badge } from '@repo/design-system/components/ui/badge';
 import {} from '@repo/design-system/components/ui/breadcrumb';
 import {
   Tabs,
@@ -43,8 +45,25 @@ export default async function EventDetailPage({
       <Header pages={['Events']} page={event.title} />
 
       <main className="flex-1 space-y-4 p-4 pt-6 md:p-8">
-        <div className="flex items-center justify-between space-y-2">
+        <div className="flex items-center justify-start space-y-2">
           <h2 className="font-bold text-3xl tracking-tight">{event.title}</h2>
+          {event.isPremiumEvent && (
+            <Badge
+              variant="secondary"
+              className="premium-badge"
+              style={{
+                backgroundColor: '#fef3c7',
+                marginLeft: '0.75rem',
+                color: '#92400e',
+                display: 'flex',
+                gap: '0.25rem',
+                alignItems: 'center',
+              }}
+            >
+              <StarIcon className="h-3 w-3" />
+              Premium Event
+            </Badge>
+          )}
         </div>
         <Tabs defaultValue="summary">
           <div className="flex items-center justify-between">

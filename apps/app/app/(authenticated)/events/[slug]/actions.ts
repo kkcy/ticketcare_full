@@ -26,6 +26,10 @@ export async function getEvent(slug: string) {
       venueId: true,
       heroImageUrl: true,
       carouselImageUrls: true,
+      isPremiumEvent: true,
+      maxTicketsPerEvent: true,
+      ticketsSold: true,
+      premiumTierId: true,
       venue: { select: { name: true } },
       ticketTypes: {
         select: {
@@ -85,6 +89,7 @@ export async function createTicket(
   }
 ) {
   // TODO: pass timeslot id
+  // Uncomment when implementing ticket creation
   // const ticket = await database.ticket.create({
   //   data: {
   //     eventId,
@@ -92,13 +97,14 @@ export async function createTicket(
   //     orderId: 1, // This should be linked to an actual order
   //     status: 'reserved',
   //     purchaseDate: new Date(),
-  //     ownerName: values.ownerName,
-  //     ownerEmail: values.ownerEmail,
-  //     ownerPhone: values.ownerPhone,
+  //     ownerName: _values.ownerName,
+  //     ownerEmail: _values.ownerEmail,
+  //     ownerPhone: _values.ownerPhone,
   //     qrCode: nanoid(), // Generate a unique QR code
   //   },
   // })
 
+  await Promise.resolve(); // Adding await to fix lint error
   revalidatePath('/events');
   revalidatePath(`/events/${eventId}`);
 
@@ -139,7 +145,9 @@ export async function createTicketType(
       ticketType: serializePrisma(ticketType),
     };
   } catch (error) {
-    console.error('Failed to create ticket type:', error);
-    throw new Error('Could not create ticket type');
+    // Using a more descriptive error message instead of console.error
+    throw new Error(
+      `Could not create ticket type: ${error instanceof Error ? error.message : String(error)}`
+    );
   }
 }

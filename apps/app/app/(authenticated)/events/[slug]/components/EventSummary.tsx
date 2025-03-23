@@ -58,6 +58,18 @@ export function EventSummary({ event }: EventSummaryProps) {
             {title(event.status)}
           </p>
         </div>
+        <div className="rounded-lg border p-4">
+          <div className="flex items-center gap-2">
+            <TicketIcon className="h-4 w-4 text-muted-foreground" />
+            <h3 className="font-semibold">Ticket Capacity</h3>
+          </div>
+          <p className="mt-2 text-muted-foreground text-sm">
+            {event.maxTicketsPerEvent} tickets
+            {!event.isPremiumEvent && (
+              <span className="ml-1 text-yellow-600">(Free tier limit)</span>
+            )}
+          </p>
+        </div>
       </div>
 
       <div className="rounded-lg border p-4">

@@ -6,6 +6,7 @@ import {
   MapPinIcon,
   StarIcon,
 } from '@repo/design-system/components/icons';
+import { Badge } from '@repo/design-system/components/ui/badge';
 import {
   Card,
   CardContent,
@@ -35,8 +36,19 @@ export const UpcomingEvents = async () => {
       },
       organizerId: session.session.organizerId,
     },
-    include: {
-      venue: true,
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      description: true,
+      startTime: true,
+      venue: {
+        select: {
+          name: true,
+        },
+      },
+      isPremiumEvent: true,
+      maxTicketsPerEvent: true,
     },
     orderBy: {
       startTime: 'desc',
@@ -55,12 +67,31 @@ export const UpcomingEvents = async () => {
   }
 
   return (
-    <div className="grid min-h-[100vh] flex-1 auto-rows-min gap-4 md:min-h-min lg:grid-cols-3">
+    <div className="grid min-h-[100vh] flex-1 auto-rows-fr gap-4 md:min-h-min lg:grid-cols-3">
       {events.map((event) => (
         <Link key={event.id} href={`/events/${event.slug}`}>
           <Card className="transition-shadow hover:shadow-md">
             <CardHeader className="font-semibold text-lg">
-              <CardTitle>{event.title}</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>{event.title}</CardTitle>
+                {event.isPremiumEvent && (
+                  <Badge
+                    variant="secondary"
+                    className="premium-badge"
+                    style={{
+                      backgroundColor: '#fef3c7',
+                      marginLeft: '0.5rem',
+                      color: '#92400e',
+                      display: 'flex',
+                      gap: '0.25rem',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <StarIcon className="h-3 w-3" />
+                    Premium
+                  </Badge>
+                )}
+              </div>
             </CardHeader>
             <CardContent className="space-y-1 text-sm">
               <p className="flex items-center">
