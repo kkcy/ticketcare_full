@@ -1,4 +1,5 @@
 'use server';
+
 import { randomUUID } from 'node:crypto';
 import { auth } from '@repo/auth/server';
 import {
@@ -9,7 +10,6 @@ import {
 import { revalidatePath } from 'next/cache';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
-import type { OrderFormValues } from './components/OrderForm';
 
 interface SearchOrdersParams {
   search?: string;
@@ -201,7 +201,9 @@ export async function searchOrders({
   };
 }
 
-export async function createOrder(data: OrderFormValues) {
+export async function createOrder(
+  data: PrismaNamespace.OrderUncheckedCreateInput
+) {
   const ticketType = await database.ticketType.findUnique({
     where: { id: data.ticketTypeId },
   });

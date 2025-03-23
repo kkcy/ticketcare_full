@@ -1,6 +1,5 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
 import type { PrismaNamespace } from '@repo/database';
 import { Button } from '@repo/design-system/components/ui/button';
 import { DialogFooter } from '@repo/design-system/components/ui/dialog';
@@ -23,11 +22,9 @@ import {
   SelectValue,
 } from '@repo/design-system/components/ui/select';
 import { toast } from '@repo/design-system/components/ui/sonner';
-import { z } from 'zod';
-import { createOrder } from '../actions';
-import { EventAutocomplete } from './EventAutocomplete';
-import { TicketTypeAutocomplete } from './TicketTypeAutocomplete';
-import { UserAutocomplete } from './UserAutocomplete';
+import { EventAutocomplete } from './components/EventAutocomplete';
+import { TicketTypeAutocomplete } from './components/TicketTypeAutocomplete';
+import { UserAutocomplete } from './components/UserAutocomplete';
 
 interface OrderFormProps {
   setOpen?: (open: boolean) => void;
@@ -35,40 +32,19 @@ interface OrderFormProps {
   order?: PrismaNamespace.OrderGetPayload<{ include: { user: true } }>;
 }
 
-export const orderFormSchema = z.object({
-  userId: z.string().optional(),
-  customerEmail: z.string().optional(), // .email('Invalid email address')
-  customerName: z.string().optional(), // .min(1, 'Customer name is required'),
-  customerPhone: z.string().optional(),
-  eventId: z.number().min(1, 'Event is required'),
-  ticketTypeId: z.number().min(1, 'Ticket type is required'),
-  quantity: z.number().min(1, 'Quantity must be at least 1'),
-  // totalAmount: zodDecimal(),
-  paymentMethod: z.string().min(1, 'Payment method is required'),
-  // transactionId: z.string().min(1, 'Transaction ID is required'),
-  paymentStatus: z.string().min(1, 'Payment status is required'),
-  status: z
-    .enum(['pending', 'completed', 'cancelled', 'refunded'])
-    .default('pending'),
-  orderedAt: z.date().default(() => new Date()),
-});
-
-export type OrderFormValues = z.infer<typeof orderFormSchema>;
-
 export function OrderForm({ setOpen, mode = 'create', order }: OrderFormProps) {
-  const form = useForm<OrderFormValues>({
-    resolver: zodResolver(orderFormSchema),
+  const form = useForm<PrismaNamespace.OrderUncheckedCreateInput>({
     defaultValues: {
       userId: order?.userId || '',
       customerEmail: order?.user?.email || '',
       customerName: order?.user?.firstName || '',
       customerPhone: order?.user?.phone || '',
-      eventId: undefined, // TODO
-      ticketTypeId: undefined, // TODO
+      eventId: order?.eventId || '',
+      ticketTypeId: order?.ticketTypeId || '',
       quantity: 1,
-      // totalAmount: Number(order?.totalAmount) || 0,
+      totalAmount: Number(order?.totalAmount) || 0,
       paymentMethod: order?.paymentMethod || '',
-      // transactionId: order?.transactionId || '',
+      transactionId: order?.transactionId || '',
       paymentStatus: order?.paymentStatus || '',
       status: order?.status || 'pending',
       orderedAt: order?.orderedAt || new Date(),
@@ -97,38 +73,12 @@ export function OrderForm({ setOpen, mode = 'create', order }: OrderFormProps) {
   //   }
   // }, [ticketTypeId, quantity, updateTotalAmount])
 
-  console.log(
-    'userId',
-    form.watch('userId'),
-    'customerEmail',
-    form.watch('customerEmail'),
-    'customerName',
-    form.watch('customerName'),
-    'customerPhone',
-    form.watch('customerPhone'),
-    'eventId',
-    form.watch('eventId'),
-    'ticketTypeId',
-    form.watch('ticketTypeId'),
-    'quantity',
-    form.watch('quantity'),
-    'paymentMethod',
-    form.watch('paymentMethod'),
-    'paymentStatus',
-    form.watch('paymentStatus'),
-    'status',
-    form.watch('status'),
-    'orderedAt',
-    form.watch('orderedAt')
-  );
-
-  async function onSubmit(values: OrderFormValues) {
+  function onSubmit(values: PrismaNamespace.OrderUncheckedCreateInput) {
     console.log(values);
 
     try {
       if (mode === 'create') {
-        const createResponse = await createOrder(values);
-        console.log(createResponse);
+        // const createResponse = await createOrder(values);
       } else {
         // await updateOrder(order.id, values)
       }

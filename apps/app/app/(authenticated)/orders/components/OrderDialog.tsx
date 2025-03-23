@@ -18,7 +18,7 @@ import {
 } from '@repo/design-system/components/ui/drawer';
 import { useMediaQuery } from '@repo/design-system/hooks/use-media-query';
 import * as React from 'react';
-import { OrderForm } from './OrderForm';
+import { OrderForm } from '../form';
 
 interface OrderDialogProps {
   mode?: 'create' | 'edit';
