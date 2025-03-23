@@ -180,30 +180,30 @@ model Organizer {
 }
 
 model Venue {
-  id             String   @id @default(uuid())
-  name           String
-  slug           String   @unique
-  description    String?
-  address        String?
-  city           String?
-  state          String?
-  country        String?
-  postalCode     String?  @map("postal_code")
-  latitude       Decimal?
-  longitude      Decimal?
-  totalCapacity  Int?     @map("total_capacity")
-  amenities      String[]
-  parking        Boolean?
-  accessibility  Boolean?
-  food           Boolean?
-  drinks         Boolean?
-  images         String[]
-  ageRestriction Int?     @map("age_restriction")
-  dresscode      String?
-  customRules    String[] @map("custom_rules")
-  events         Event[]
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  id            String   @id @default(uuid())
+  name          String
+  slug          String   @unique
+  description   String?
+  address       String?
+  city          String?
+  state         String?
+  country       String?
+  postalCode    String?  @map("postal_code")
+  latitude      Decimal?
+  longitude     Decimal?
+  totalCapacity Int?     @map("total_capacity")
+  // amenities      String[]
+  // parking        Boolean?
+  // accessibility  Boolean?
+  // food           Boolean?
+  // drinks         Boolean?
+  // ageRestriction Int?     @map("age_restriction")
+  // dresscode      String?
+  // customRules    String[] @map("custom_rules")
+  images        String[]
+  events        Event[]
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
   @@map("venue")
 }
