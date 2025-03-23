@@ -22,9 +22,9 @@ import {
   SelectValue,
 } from '@repo/design-system/components/ui/select';
 import { toast } from '@repo/design-system/components/ui/sonner';
+import { UserAutocomplete } from '../components/UserAutocomplete';
 import { EventAutocomplete } from './components/EventAutocomplete';
 import { TicketTypeAutocomplete } from './components/TicketTypeAutocomplete';
-import { UserAutocomplete } from './components/UserAutocomplete';
 
 interface OrderFormProps {
   setOpen?: (open: boolean) => void;
