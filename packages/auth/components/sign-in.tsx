@@ -48,7 +48,6 @@ export const SignIn = () => {
       }
     } catch (error) {
       setPending(false);
-      // biome-ignore lint/suspicious/noConsole: <explanation>
       console.error(error);
       form.setError('root', { message: 'Invalid email or password' });
     }

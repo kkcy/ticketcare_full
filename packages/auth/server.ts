@@ -147,7 +147,6 @@ const options = {
               },
             };
           } catch (error) {
-            // biome-ignore lint/suspicious/noConsole: error logs
             console.error('Error listing organizations:', error);
 
             return {
@@ -161,7 +160,6 @@ const options = {
   onAPIError: {
     throw: true,
     onError: (error) => {
-      // biome-ignore lint/suspicious/noConsole: <explanation>
       console.error('Auth error:', error);
     },
     errorURL: '/auth/error',
