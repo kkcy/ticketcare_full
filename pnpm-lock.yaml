@@ -667,8 +667,8 @@ importers:
         specifier: ^0.0.1
         version: 0.0.1
       undici:
-        specifier: ^7.4.0
-        version: 7.4.0
+        specifier: ^7.5.0
+        version: 7.5.0
       zod:
         specifier: ^3.24.2
         version: 3.24.2
@@ -5586,8 +5586,8 @@ packages:
   '@types/node-fetch@2.6.12':
     resolution: {integrity: sha512-8nneRWKCg3rMtF69nLQJnOYUcbafYeFSjqkw3jCRLsqkWFlHaoQrr5mXmofFGOx3DKn7UfmBMyov8ySvLRVldA==}
 
-  '@types/node@18.19.79':
-    resolution: {integrity: sha512-90K8Oayimbctc5zTPHPfZloc/lGVs7f3phUAAMcTgEPtg8kKquGZDERC8K4vkBYkQQh48msiYUslYtxTWvqcAg==}
+  '@types/node@18.19.81':
+    resolution: {integrity: sha512-7KO9oZ2//ivtSsryp0LQUqq79zyGXzwq1WqfywpC9ucjY7YyltMMmxWgtRFRKCxwa7VPxVBVy4kHf5UC1E8Lug==}
 
   '@types/node@22.13.9':
     resolution: {integrity: sha512-acBjXdRJ3A6Pb3tqnw9HZmyR3Fiol3aGxRCK1x3d+6CDAMjl7I649wpSd+yNURCjbOUGu9tqtLKnTGxmK6CyGw==}
@@ -8241,8 +8241,8 @@ packages:
     resolution: {integrity: sha512-FIyV/64EkKhJmjgC0g2hygpBv5RNWVPyNCqSAD7eTCv6eFWNIi4PN1UvdSJGicN/o35bnevgis4Y0UDC0qi8jQ==}
     engines: {node: '>=14.0.0'}
 
-  langsmith@0.3.12:
-    resolution: {integrity: sha512-e4qWM27hxEr8GfO6dgXrc3W8La+wxkX1zEtMhxhqS/Th2ujTt5OH7x0uXfXFDqCv9WaC3nquo1Y2s4vpYmLLtg==}
+  langsmith@0.3.14:
+    resolution: {integrity: sha512-MzoxdRkFFV/6140vpP5V2e2fkTG6x/0zIjw77bsRwAXEMjPRTUyDazfXeSyrS5uJvbLgxAXc+MF1h6vPWe6SXQ==}
     peerDependencies:
       openai: '*'
     peerDependenciesMeta:
@@ -8704,6 +8704,10 @@ packages:
 
   mime-db@1.53.0:
     resolution: {integrity: sha512-oHlN/w+3MQ3rba9rqFr6V/ypF10LSkdwUysQL7GkXoTgIWeV+tcXGA852TBxH+gsh8UWoyhR1hKcoMJTuWflpg==}
+    engines: {node: '>= 0.6'}
+
+  mime-db@1.54.0:
+    resolution: {integrity: sha512-aU5EJuIN2WDemCcAp2vFBfp/m4EAhWJnUNSSw0ixs7/kXbd6Pg64EmwJkNdFhB8aWt1sH2CTXrLxo/iAGV3oPQ==}
     engines: {node: '>= 0.6'}
 
   mime-types@2.1.35:
@@ -10793,12 +10797,12 @@ packages:
   undici-types@6.20.0:
     resolution: {integrity: sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg==}
 
-  undici@5.28.5:
-    resolution: {integrity: sha512-zICwjrDrcrUE0pyyJc1I2QzBkLM8FINsgOrt6WjA+BgajVq9Nxu2PbFFXUrAggLfDXlZGZBVZYw7WNV5KiBiBA==}
+  undici@5.29.0:
+    resolution: {integrity: sha512-raqeBD6NQK4SkWhQzeYKd1KmIG6dllBOTt55Rmkt4HtI9mwdWtJljnrXjAFUBLTSN67HWrOIZ3EPF4kjUw80Bg==}
     engines: {node: '>=14.0'}
 
-  undici@7.4.0:
-    resolution: {integrity: sha512-PUQM3/es3noM24oUn10u3kNNap0AbxESOmnssmW+dOi9yGwlUSi5nTNYl3bNbTkWOF8YZDkx2tCmj9OtQ3iGGw==}
+  undici@7.5.0:
+    resolution: {integrity: sha512-NFQG741e8mJ0fLQk90xKxFdaSM7z4+IQpAgsFI36bCDY9Z2+aXXZjVy2uUksMouWfMI9+w5ejOq5zYYTBCQJDQ==}
     engines: {node: '>=20.18.1'}
 
   unicode-canonical-property-names-ecmascript@2.0.1:
@@ -11298,6 +11302,11 @@ packages:
 
   zod-to-json-schema@3.24.3:
     resolution: {integrity: sha512-HIAfWdYIt1sssHfYZFCXp4rU1w2r8hVVXYIlmoa0r0gABLs5di3RCqPU5DDROogVz1pAdYBaz7HK5n9pSUNs3A==}
+    peerDependencies:
+      zod: ^3.24.1
+
+  zod-to-json-schema@3.24.5:
+    resolution: {integrity: sha512-/AuWwMP+YqiPbsJx5D6TfgRTc4kTLjsh5SOcd4bLsfUg2RcEXrFMJl1DGgdHy2aCfsIA/cr/1JM0xcB2GZji8g==}
     peerDependencies:
       zod: ^3.24.1
 
@@ -12814,11 +12823,11 @@ snapshots:
       listr2: 6.6.1(enquirer@2.4.1)
       lodash: 4.17.21
       mkdirp: 0.5.6
-      native-fetch: 4.0.2(undici@5.28.5)
+      native-fetch: 4.0.2(undici@5.29.0)
       prettier: 2.8.8
       qs: 6.14.0
       rimraf: 2.7.1
-      undici: 5.28.5
+      undici: 5.29.0
       yargs: 15.4.1
     transitivePeerDependencies:
       - enquirer
@@ -12912,7 +12921,7 @@ snapshots:
     dependencies:
       '@bufbuild/protobuf': 1.10.0
       '@connectrpc/connect': 1.6.1(@bufbuild/protobuf@1.10.0)
-      undici: 5.28.5
+      undici: 5.29.0
 
   '@connectrpc/connect-web@1.6.1(@bufbuild/protobuf@1.10.0)(@connectrpc/connect@1.6.1(@bufbuild/protobuf@1.10.0))':
     dependencies:
@@ -13456,13 +13465,13 @@ snapshots:
       camelcase: 6.3.0
       decamelize: 1.2.0
       js-tiktoken: 1.0.19
-      langsmith: 0.3.12(openai@4.86.1(ws@8.18.1(bufferutil@4.0.9))(zod@3.24.2))
+      langsmith: 0.3.14(openai@4.86.1(ws@8.18.1(bufferutil@4.0.9))(zod@3.24.2))
       mustache: 4.2.0
       p-queue: 6.6.2
       p-retry: 4.6.2
       uuid: 10.0.0
       zod: 3.24.2
-      zod-to-json-schema: 3.24.3(zod@3.24.2)
+      zod-to-json-schema: 3.24.5(zod@3.24.2)
     transitivePeerDependencies:
       - openai
 
@@ -13531,7 +13540,7 @@ snapshots:
       pkce-challenge: 4.1.0
       raw-body: 3.0.0
       zod: 3.24.2
-      zod-to-json-schema: 3.24.3(zod@3.24.2)
+      zod-to-json-schema: 3.24.5(zod@3.24.2)
     transitivePeerDependencies:
       - supports-color
 
@@ -16642,7 +16651,7 @@ snapshots:
       '@types/node': 22.13.9
       form-data: 4.0.2
 
-  '@types/node@18.19.79':
+  '@types/node@18.19.81':
     dependencies:
       undici-types: 5.26.5
 
@@ -19675,7 +19684,7 @@ snapshots:
 
   kysely@0.27.6: {}
 
-  langsmith@0.3.12(openai@4.86.1(ws@8.18.1(bufferutil@4.0.9))(zod@3.24.2)):
+  langsmith@0.3.14(openai@4.86.1(ws@8.18.1(bufferutil@4.0.9))(zod@3.24.2)):
     dependencies:
       '@types/uuid': 10.0.0
       chalk: 4.1.2
@@ -20392,13 +20401,15 @@ snapshots:
 
   mime-db@1.53.0: {}
 
+  mime-db@1.54.0: {}
+
   mime-types@2.1.35:
     dependencies:
       mime-db: 1.52.0
 
   mime-types@3.0.0:
     dependencies:
-      mime-db: 1.53.0
+      mime-db: 1.54.0
 
   mimic-fn@2.1.0: {}
 
@@ -20465,9 +20476,9 @@ snapshots:
 
   nanostores@0.11.4: {}
 
-  native-fetch@4.0.2(undici@5.28.5):
+  native-fetch@4.0.2(undici@5.29.0):
     dependencies:
-      undici: 5.28.5
+      undici: 5.29.0
 
   negotiator@0.6.3: {}
 
@@ -20740,7 +20751,7 @@ snapshots:
 
   openai@4.86.1(ws@8.18.1(bufferutil@4.0.9))(zod@3.24.2):
     dependencies:
-      '@types/node': 18.19.79
+      '@types/node': 18.19.81
       '@types/node-fetch': 2.6.12
       abort-controller: 3.0.0
       agentkeepalive: 4.6.0
@@ -22804,11 +22815,11 @@ snapshots:
 
   undici-types@6.20.0: {}
 
-  undici@5.28.5:
+  undici@5.29.0:
     dependencies:
       '@fastify/busboy': 2.1.1
 
-  undici@7.4.0: {}
+  undici@7.5.0: {}
 
   unicode-canonical-property-names-ecmascript@2.0.1: {}
 
@@ -23350,6 +23361,10 @@ snapshots:
   yocto-queue@1.1.1: {}
 
   zod-to-json-schema@3.24.3(zod@3.24.2):
+    dependencies:
+      zod: 3.24.2
+
+  zod-to-json-schema@3.24.5(zod@3.24.2):
     dependencies:
       zod: 3.24.2
 
