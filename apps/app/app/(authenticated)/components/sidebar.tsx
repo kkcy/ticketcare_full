@@ -10,6 +10,7 @@ import {
   SendIcon,
   Settings2Icon,
   ShoppingBagIcon,
+  UserCog2Icon,
   UsersRoundIcon,
 } from '@repo/design-system/components/icons';
 import { ModeToggle } from '@repo/design-system/components/mode-toggle';
@@ -64,13 +65,31 @@ const data = {
       url: '/users',
       icon: UsersRoundIcon,
     },
+  ],
+  navAdmin: [
+    {
+      title: 'Premium Tiers',
+      url: '/admin/premium-tiers',
+      icon: Settings2Icon,
+      isActive: true,
+    },
+    {
+      title: 'Venues',
+      url: '/admin/venues',
+      icon: ShoppingBagIcon,
+    },
+    {
+      title: 'Organizers',
+      url: '/admin/organizers',
+      icon: UserCog2Icon,
+    },
+  ],
+  navSecondary: [
     {
       title: 'Settings',
       url: '/settings',
       icon: Settings2Icon,
     },
-  ],
-  navSecondary: [
     {
       title: 'Webhooks',
       url: '/webhooks',
@@ -127,6 +146,27 @@ export const GlobalSidebar = ({
         <SidebarContent>
           <SidebarGroup>
             <SidebarGroupLabel>Platform</SidebarGroupLabel>
+            <SidebarMenu>
+              {data.navAdmin.map((item) => (
+                <Collapsible
+                  key={item.title}
+                  asChild
+                  defaultOpen={item.isActive}
+                >
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild tooltip={item.title}>
+                      <Link href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </Collapsible>
+              ))}
+            </SidebarMenu>
+          </SidebarGroup>
+          <SidebarGroup>
+            <SidebarGroupLabel>Organizer</SidebarGroupLabel>
             <SidebarMenu>
               {data.navMain.map((item) => (
                 <Collapsible

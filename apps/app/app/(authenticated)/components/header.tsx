@@ -8,7 +8,7 @@ import {
 } from '@repo/design-system/components/ui/breadcrumb';
 import { Separator } from '@repo/design-system/components/ui/separator';
 import { SidebarTrigger } from '@repo/design-system/components/ui/sidebar';
-import { isEmpty } from 'radash';
+import { dash, isEmpty } from 'radash';
 import { Fragment, type ReactNode } from 'react';
 
 type HeaderProps = {
@@ -28,7 +28,7 @@ export const Header = ({ pages, page, children }: HeaderProps) => (
             <Fragment key={page}>
               {index > 0 && <BreadcrumbSeparator className="hidden md:block" />}
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href={`/${page.toLowerCase()}`}>
+                <BreadcrumbLink href={`/${dash(page.toLowerCase())}`}>
                   {page}
                 </BreadcrumbLink>
               </BreadcrumbItem>
