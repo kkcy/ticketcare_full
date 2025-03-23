@@ -1,13 +1,8 @@
-import { getCorsHeaders } from '@/app/lib/api';
+import { withCors } from '@/app/lib/api';
 import { database, serializePrisma } from '@repo/database';
 import { type NextRequest, NextResponse } from 'next/server';
 
-/**
- * Basic GET Request
- * @param request
- * @returns
- */
-export const GET = async (request: NextRequest) => {
+export const handler = async (request: NextRequest) => {
   const searchParams = request.nextUrl.searchParams;
   const query = searchParams.get('query');
 
@@ -28,7 +23,9 @@ export const GET = async (request: NextRequest) => {
     { data: serializePrisma(venues) },
     {
       status: 200,
-      headers: getCorsHeaders(request.headers.get('origin') || ''),
     }
   );
 };
+
+export const OPTIONS = withCors(handler);
+export const GET = withCors(handler);

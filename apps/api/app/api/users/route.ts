@@ -1,34 +1,15 @@
-import { getCorsHeaders } from '@/app/lib/api';
+import { withCors } from '@/app/lib/api';
 import { database, serializePrisma } from '@repo/database';
 import { type NextRequest, NextResponse } from 'next/server';
 
-/**
- * Basic OPTIONS Request to simuluate OPTIONS preflight request for mutative requests
- */
-export const OPTIONS = async (request: NextRequest) => {
-  // Return Response
-  return NextResponse.json(
-    {},
-    {
-      status: 200,
-      headers: getCorsHeaders(request.headers.get('origin') || ''),
-    }
-  );
-};
-
-/**
- * Basic GET Request
- * @param request
- * @returns
- */
-export const GET = async (request: NextRequest) => {
+export const handler = async (request: NextRequest) => {
   const searchParams = request.nextUrl.searchParams;
   const query = searchParams.get('query');
   const event = searchParams.get('event');
   const organizerId = searchParams.get('organizerId');
   const numericEvent = Number.parseInt(event ?? '');
 
-  const customers = await database.customer.findMany({
+  const users = await database.user.findMany({
     where: {
       OR: [
         {
@@ -63,7 +44,9 @@ export const GET = async (request: NextRequest) => {
               tickets: {
                 some: {
                   eventId:
-                    event && !isNaN(numericEvent) ? numericEvent : undefined,
+                    event && !Number.isNaN(numericEvent)
+                      ? String(numericEvent)
+                      : undefined,
                   event: {
                     organizerId: organizerId ?? undefined,
                   },
@@ -76,13 +59,9 @@ export const GET = async (request: NextRequest) => {
     },
     select: {
       id: true,
-      type: true,
       firstName: true,
       lastName: true,
       email: true,
-      eventTypes: true,
-      lastLogin: true,
-      balance: true,
       _count: {
         select: {
           orders: {
@@ -112,10 +91,12 @@ export const GET = async (request: NextRequest) => {
   });
 
   return NextResponse.json(
-    { data: serializePrisma(customers) },
+    { data: serializePrisma(users) },
     {
       status: 200,
-      headers: getCorsHeaders(request.headers.get('origin') || ''),
     }
   );
 };
+
+export const OPTIONS = withCors(handler);
+export const GET = withCors(handler);

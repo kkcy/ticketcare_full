@@ -3,7 +3,6 @@ import { config, withAnalyzer } from '@repo/next-config';
 import { withLogging, withSentry } from '@repo/observability/next-config';
 import type { NextConfig } from 'next';
 
-// Apply CORS headers to all API routes
 let nextConfig: NextConfig = withLogging(config);
 
 if (env.VERCEL) {

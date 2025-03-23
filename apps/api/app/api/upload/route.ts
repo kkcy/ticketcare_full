@@ -44,4 +44,5 @@ async function handler(request: NextRequest) {
   }
 }
 
+export const OPTIONS = withCors(handler);
 export const POST = withCors(handler);

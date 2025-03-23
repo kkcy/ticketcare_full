@@ -1,27 +1,12 @@
-import { getCorsHeaders } from '@/app/lib/api';
-import { type Prisma, database, serializePrisma } from '@repo/database';
+import { withCors } from '@/app/lib/api';
+import {
+  type PrismaNamespace,
+  database,
+  serializePrisma,
+} from '@repo/database';
 import { type NextRequest, NextResponse } from 'next/server';
 
-/**
- * Basic OPTIONS Request to simuluate OPTIONS preflight request for mutative requests
- */
-export const OPTIONS = async (request: NextRequest) => {
-  // Return Response
-  return NextResponse.json(
-    {},
-    {
-      status: 200,
-      headers: getCorsHeaders(request.headers.get('origin') || ''),
-    }
-  );
-};
-
-/**
- * Basic GET Request
- * @param request
- * @returns
- */
-export const GET = async (request: NextRequest) => {
+export const handler = async (request: NextRequest) => {
   const searchParams = request.nextUrl.searchParams;
   const page = Number(searchParams.get('page') ?? '1');
   const limit = Number(searchParams.get('limit') ?? 10);
@@ -30,21 +15,21 @@ export const GET = async (request: NextRequest) => {
 
   const skip = (page - 1) * limit;
   const numericSearch = Number.parseInt(search);
-  const whereCondition: Prisma.OrderWhereInput = {
+  const whereCondition: PrismaNamespace.OrderWhereInput = {
     ...(search
       ? {
           OR: [
             // Search by transaction ID
-            ...(isNaN(numericSearch)
+            ...(Number.isNaN(numericSearch)
               ? []
               : [
                   {
-                    id: numericSearch,
+                    id: String(numericSearch),
                   },
                 ]),
             // Search by name
             {
-              customer: {
+              user: {
                 firstName: {
                   contains: search,
                   mode: 'insensitive',
@@ -53,7 +38,7 @@ export const GET = async (request: NextRequest) => {
             },
             // Search by name
             {
-              customer: {
+              user: {
                 lastName: {
                   contains: search,
                   mode: 'insensitive',
@@ -62,7 +47,7 @@ export const GET = async (request: NextRequest) => {
             },
             // Search by email
             {
-              customer: {
+              user: {
                 email: {
                   contains: search,
                   mode: 'insensitive',
@@ -107,9 +92,9 @@ export const GET = async (request: NextRequest) => {
         paymentMethod: true,
         orderedAt: true,
         totalAmount: true,
-        customer: {
+        user: {
           select: {
-            firstName: true,
+            name: true,
           },
         },
         tickets: {
@@ -150,7 +135,9 @@ export const GET = async (request: NextRequest) => {
     { data: serializePrisma(orders) },
     {
       status: 200,
-      headers: getCorsHeaders(request.headers.get('origin') || ''),
     }
   );
 };
+
+export const OPTIONS = withCors(handler);
+export const GET = withCors(handler);
