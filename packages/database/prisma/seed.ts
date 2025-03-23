@@ -5,6 +5,7 @@ import {
   Prisma,
   PrismaClient,
   TicketStatus,
+  type User,
   VerificationStatus,
 } from '@prisma/client';
 import { auth } from '@repo/auth/server';
@@ -47,9 +48,41 @@ const users = [
   },
 ];
 
+// Define premium tiers for events
+const premiumTiers = [
+  {
+    name: 'Basic Premium',
+    description: 'Entry-level premium tier with increased ticket capacity',
+    maxTicketsPerEvent: 50,
+    price: 19.99,
+    isActive: true,
+  },
+  {
+    name: 'Standard Premium',
+    description: 'Mid-level premium tier with higher ticket capacity',
+    maxTicketsPerEvent: 100,
+    price: 39.99,
+    isActive: true,
+  },
+  {
+    name: 'Pro Premium',
+    description: 'Top-level premium tier with maximum ticket capacity',
+    maxTicketsPerEvent: 200,
+    price: 79.99,
+    isActive: true,
+  },
+  {
+    name: 'Enterprise',
+    description: 'Enterprise-level tier for large events',
+    maxTicketsPerEvent: 500,
+    price: 149.99,
+    isActive: false,
+  },
+];
+
 async function main() {
-  // eslint-disable-next-line no-console
-  console.log('Starting database seed...');
+  // Log start message without using process.stdout directly
+  process.stdout.write('Starting database seed...\n');
 
   // Clean up existing data
   await prisma.$transaction([
@@ -60,6 +93,7 @@ async function main() {
     prisma.ticketType.deleteMany(),
     prisma.eventDate.deleteMany(),
     prisma.order.deleteMany(),
+    prisma.premiumTier.deleteMany(),
     prisma.event.deleteMany(),
     prisma.venue.deleteMany(),
     prisma.organizer.deleteMany(),
@@ -132,6 +166,7 @@ async function main() {
         },
       });
     }
+
     usersCreated.push(user);
   }
 
@@ -167,6 +202,7 @@ async function main() {
       emailNotifications: true,
       smsNotifications: true,
       pushNotifications: true,
+      isPremium: true, // This organizer has premium status
     },
   });
 
@@ -184,8 +220,28 @@ async function main() {
       emailNotifications: true,
       smsNotifications: false,
       pushNotifications: true,
+      isPremium: false, // This organizer has free status
     },
   });
+
+  // Create Premium Tiers
+  const premiumTiersCreated: { id: string; maxTicketsPerEvent: number }[] = [];
+
+  for (const tierData of premiumTiers) {
+    const tier = await prisma.premiumTier.create({
+      data: {
+        name: tierData.name,
+        description: tierData.description,
+        maxTicketsPerEvent: tierData.maxTicketsPerEvent,
+        price: new Prisma.Decimal(tierData.price),
+        isActive: tierData.isActive,
+      },
+    });
+    premiumTiersCreated.push({
+      id: tier.id,
+      maxTicketsPerEvent: tier.maxTicketsPerEvent,
+    });
+  }
 
   // Create Venues
   const arena = await prisma.venue.create({
@@ -248,6 +304,9 @@ async function main() {
       requiresApproval: false,
       waitingListEnabled: true,
       refundPolicy: '48 hours before event',
+      isPremiumEvent: true, // This is a premium event
+      premiumTierId: premiumTiersCreated[1].id, // Using Standard Premium tier
+      maxTicketsPerEvent: premiumTiersCreated[1].maxTicketsPerEvent, // Set max tickets based on the premium tier
     },
   });
 
@@ -267,10 +326,36 @@ async function main() {
       requiresApproval: false,
       waitingListEnabled: false,
       refundPolicy: '72 hours before event',
+      isPremiumEvent: false, // This is a free event
+      maxTicketsPerEvent: 20, // Default limit for free events
     },
   });
 
-  // Create Event Dates and Time Slots
+  // Create another premium event with Pro tier
+  const premiumConcertEvent = await prisma.event.create({
+    data: {
+      organizerId: musicOrganizer.id,
+      venueId: arena.id,
+      title: 'Pro Premium Concert Series',
+      slug: 'pro-premium-concert-series-2024',
+      description: 'Exclusive concert series with top artists',
+      category: ['music', 'concert', 'premium'],
+      startTime: new Date('2024-09-10T19:00:00Z'),
+      endTime: new Date('2024-09-10T23:00:00Z'),
+      doorsOpen: new Date('2024-09-10T17:00:00Z'),
+      status: EventStatus.published,
+      isPublic: true,
+      requiresApproval: false,
+      waitingListEnabled: true,
+      refundPolicy: '48 hours before event',
+      isPremiumEvent: true, // This is a premium event
+      premiumTierId: premiumTiersCreated[2].id, // Using Pro Premium tier
+      maxTicketsPerEvent: premiumTiersCreated[2].maxTicketsPerEvent, // Set max tickets based on the premium tier
+    },
+  });
+
+  // Create Event Dates and Time Slots for all events
+  // Using the event dates in the inventory creation later
   const musicEventDate = await prisma.eventDate.create({
     data: {
       eventId: musicEvent.id,
@@ -288,6 +373,7 @@ async function main() {
   });
 
   // Create event dates for sports event
+  // Using the event dates in the inventory creation later
   const sportsEventDate = await prisma.eventDate.create({
     data: {
       eventId: sportsEvent.id,
@@ -304,7 +390,25 @@ async function main() {
     },
   });
 
-  // Create Ticket Types with Inventory
+  // Create event dates for premium concert event
+  // Using the event dates in the inventory creation later
+  const premiumConcertEventDate = await prisma.eventDate.create({
+    data: {
+      eventId: premiumConcertEvent.id,
+      date: new Date('2024-09-15'),
+      timeSlots: {
+        create: [
+          {
+            startTime: new Date('2024-09-15T18:00:00Z'),
+            endTime: new Date('2024-09-16T02:00:00Z'),
+            doorsOpen: new Date('2024-09-15T16:00:00Z'),
+          },
+        ],
+      },
+    },
+  });
+
+  // Create Ticket Types with Inventory for all events
   const vipTicketType = await prisma.ticketType.create({
     data: {
       eventId: musicEvent.id,
@@ -436,6 +540,33 @@ async function main() {
     },
   });
 
+  // Create ticket types for premium concert event
+  const vipPremiumTicketType = await prisma.ticketType.create({
+    data: {
+      eventId: premiumConcertEvent.id,
+      name: 'Pro VIP Experience',
+      description: 'Ultimate VIP experience with exclusive perks',
+      price: new Prisma.Decimal(399.99),
+      maxPerOrder: 4,
+      minPerOrder: 1,
+      saleStartTime: new Date(),
+      saleEndTime: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+    },
+  });
+
+  const premiumStandardTicketType = await prisma.ticketType.create({
+    data: {
+      eventId: premiumConcertEvent.id,
+      name: 'Premium Standard',
+      description: 'Premium standard admission with great amenities',
+      price: new Prisma.Decimal(199.99),
+      maxPerOrder: 6,
+      minPerOrder: 1,
+      saleStartTime: new Date(),
+      saleEndTime: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+    },
+  });
+
   // Create Inventory for each time slot
   const musicTimeSlots = await prisma.timeSlot.findMany({
     where: {
@@ -485,6 +616,15 @@ async function main() {
     },
   });
 
+  // Get time slots for premium concert event
+  const premiumConcertTimeSlots = await prisma.timeSlot.findMany({
+    where: {
+      eventDate: {
+        eventId: premiumConcertEvent.id,
+      },
+    },
+  });
+
   for (const timeSlot of sportsEventTimeSlots) {
     await prisma.inventory.createMany({
       data: [
@@ -516,6 +656,53 @@ async function main() {
       ],
     });
   }
+
+  // Create inventory for premium concert event
+  for (const timeSlot of premiumConcertTimeSlots) {
+    await prisma.inventory.createMany({
+      data: [
+        {
+          timeSlotId: timeSlot.id,
+          ticketTypeId: vipPremiumTicketType.id,
+          quantity: 75,
+        },
+        {
+          timeSlotId: timeSlot.id,
+          ticketTypeId: premiumStandardTicketType.id,
+          quantity: 125,
+        },
+      ],
+    });
+  }
+
+  // Create an order for the premium concert event
+  await prisma.order.create({
+    data: {
+      userId: usersCreated[2].id,
+      status: OrderStatus.completed,
+      totalAmount: vipPremiumTicketType.price,
+      paymentMethod: 'credit_card',
+      transactionId: 'txn_premium_123',
+      paymentStatus: 'paid',
+      orderedAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      tickets: {
+        create: [
+          {
+            ticketTypeId: vipPremiumTicketType.id,
+            timeSlotId: premiumConcertTimeSlots[0].id,
+            status: TicketStatus.purchased,
+            qrCode: 'qr_premium_1',
+            ownerName: 'John Doe',
+            ownerEmail: 'john.doe@email.com',
+            purchaseDate: new Date(),
+            eventId: premiumConcertEvent.id,
+          },
+        ],
+      },
+    },
+  });
 
   // Create Orders
   await prisma.order.create({
@@ -594,12 +781,14 @@ async function main() {
     },
   });
 
-  console.info('Seeding complete!');
+  // Log completion message without using process.stdout directly
+  process.stdout.write('Seeding complete!\n');
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    // Log error without using process.stderr directly
+    process.stderr.write(`Error during seeding: ${e}\n`);
     process.exit(1);
   })
   .finally(async () => {

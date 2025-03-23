@@ -86,6 +86,8 @@ CREATE TABLE "session" (
     "user_id" TEXT NOT NULL,
     "impersonated_by" TEXT,
     "active_organization_id" TEXT,
+    "active_organization_name" TEXT,
+    "organizer_id" TEXT,
 
     CONSTRAINT "session_pkey" PRIMARY KEY ("id")
 );
@@ -148,13 +150,16 @@ CREATE TABLE "organizer" (
     "push_notifications" BOOLEAN NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "is_premium" BOOLEAN NOT NULL DEFAULT false,
+    "event_credits" INTEGER NOT NULL DEFAULT 0,
+    "event_credits_used" INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT "organizer_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "venue" (
-    "id" BIGSERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "description" TEXT,
@@ -183,9 +188,9 @@ CREATE TABLE "venue" (
 
 -- CreateTable
 CREATE TABLE "event" (
-    "id" BIGSERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "organizer_id" TEXT NOT NULL,
-    "venue_id" BIGINT NOT NULL,
+    "venue_id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "description" TEXT,
@@ -199,16 +204,36 @@ CREATE TABLE "event" (
     "waiting_list_enabled" BOOLEAN NOT NULL,
     "refund_policy" TEXT,
     "approved_by_id" TEXT,
+    "max_tickets_per_event" INTEGER NOT NULL DEFAULT 20,
+    "is_premium_event" BOOLEAN NOT NULL DEFAULT false,
+    "premium_tier_id" TEXT,
+    "tickets_sold" INTEGER NOT NULL DEFAULT 0,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "hero_image_url" TEXT,
+    "carousel_image_urls" TEXT[],
 
     CONSTRAINT "event_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
+CREATE TABLE "premium_tier" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "maxTicketsPerEvent" INTEGER NOT NULL,
+    "price" DECIMAL(65,30) NOT NULL,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "premium_tier_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "event_date" (
-    "id" BIGSERIAL NOT NULL,
-    "event_id" BIGINT NOT NULL,
+    "id" TEXT NOT NULL,
+    "event_id" TEXT NOT NULL,
     "date" TIMESTAMP(3) NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -218,8 +243,8 @@ CREATE TABLE "event_date" (
 
 -- CreateTable
 CREATE TABLE "time_slot" (
-    "id" BIGSERIAL NOT NULL,
-    "event_date_id" BIGINT NOT NULL,
+    "id" TEXT NOT NULL,
+    "event_date_id" TEXT NOT NULL,
     "start_time" TIMESTAMP(3) NOT NULL,
     "end_time" TIMESTAMP(3) NOT NULL,
     "doors_open" TIMESTAMP(3) NOT NULL,
@@ -231,8 +256,8 @@ CREATE TABLE "time_slot" (
 
 -- CreateTable
 CREATE TABLE "ticket_type" (
-    "id" BIGSERIAL NOT NULL,
-    "event_id" BIGINT NOT NULL,
+    "id" TEXT NOT NULL,
+    "event_id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
     "price" DECIMAL(65,30) NOT NULL,
@@ -248,9 +273,9 @@ CREATE TABLE "ticket_type" (
 
 -- CreateTable
 CREATE TABLE "inventory" (
-    "id" BIGSERIAL NOT NULL,
-    "time_slot_id" BIGINT NOT NULL,
-    "ticket_type_id" BIGINT NOT NULL,
+    "id" TEXT NOT NULL,
+    "time_slot_id" TEXT NOT NULL,
+    "ticket_type_id" TEXT NOT NULL,
     "quantity" INTEGER NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -260,17 +285,17 @@ CREATE TABLE "inventory" (
 
 -- CreateTable
 CREATE TABLE "ticket" (
-    "id" BIGSERIAL NOT NULL,
-    "time_slot_id" BIGINT NOT NULL,
-    "ticket_type_id" BIGINT NOT NULL,
-    "order_id" BIGINT,
+    "id" TEXT NOT NULL,
+    "time_slot_id" TEXT NOT NULL,
+    "ticket_type_id" TEXT NOT NULL,
+    "order_id" TEXT,
     "status" "TicketStatus" NOT NULL,
     "purchase_date" TIMESTAMP(3),
     "owner_name" TEXT,
     "owner_email" TEXT,
     "owner_phone" TEXT,
     "qr_code" TEXT NOT NULL,
-    "eventId" BIGINT,
+    "eventId" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -291,10 +316,10 @@ CREATE TABLE "cart" (
 
 -- CreateTable
 CREATE TABLE "cart_item" (
-    "id" BIGSERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "cart_id" TEXT NOT NULL,
-    "time_slot_id" BIGINT NOT NULL,
-    "ticket_type_id" BIGINT NOT NULL,
+    "time_slot_id" TEXT NOT NULL,
+    "ticket_type_id" TEXT NOT NULL,
     "quantity" INTEGER NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -304,7 +329,7 @@ CREATE TABLE "cart_item" (
 
 -- CreateTable
 CREATE TABLE "order" (
-    "id" BIGSERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
     "status" "OrderStatus" NOT NULL,
     "total_amount" DECIMAL(65,30) NOT NULL,
@@ -347,6 +372,9 @@ CREATE INDEX "event_organizer_id_idx" ON "event"("organizer_id");
 
 -- CreateIndex
 CREATE INDEX "event_approved_by_id_idx" ON "event"("approved_by_id");
+
+-- CreateIndex
+CREATE INDEX "event_premium_tier_id_idx" ON "event"("premium_tier_id");
 
 -- CreateIndex
 CREATE INDEX "event_date_event_id_idx" ON "event_date"("event_id");
@@ -413,6 +441,9 @@ ALTER TABLE "account" ADD CONSTRAINT "account_user_id_fkey" FOREIGN KEY ("user_i
 
 -- AddForeignKey
 ALTER TABLE "organizer" ADD CONSTRAINT "organizer_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "event" ADD CONSTRAINT "event_premium_tier_id_fkey" FOREIGN KEY ("premium_tier_id") REFERENCES "premium_tier"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "event" ADD CONSTRAINT "event_organizer_id_fkey" FOREIGN KEY ("organizer_id") REFERENCES "organizer"("id") ON DELETE CASCADE ON UPDATE CASCADE;

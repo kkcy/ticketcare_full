@@ -170,6 +170,11 @@ model Organizer {
   createdAt          DateTime           @default(now()) @map("created_at")
   updatedAt          DateTime           @updatedAt @map("updated_at")
 
+  // Organizer plan properties
+  isPremium        Boolean @default(false) @map("is_premium")
+  eventCredits     Int     @default(0) @map("event_credits") // Additional credits for premium users
+  eventCreditsUsed Int     @default(0) @map("event_credits_used")
+
   @@index([userId])
   @@map("organizer")
 }
@@ -208,33 +213,57 @@ model Event {
   organizerId        String      @map("organizer_id")
   venueId            String      @map("venue_id")
   title              String
-  slug               String       @unique
+  slug               String      @unique
   description        String?
-  category           String[]     @map("categories")
-  startTime          DateTime     @map("start_time")
-  endTime            DateTime     @map("end_time")
-  doorsOpen          DateTime     @map("doors_open")
+  category           String[]    @map("categories")
+  startTime          DateTime    @map("start_time")
+  endTime            DateTime    @map("end_time")
+  doorsOpen          DateTime    @map("doors_open")
   status             EventStatus
-  isPublic           Boolean      @map("is_public")
-  requiresApproval   Boolean      @map("requires_approval")
-  waitingListEnabled Boolean      @map("waiting_list_enabled")
-  refundPolicy       String?      @map("refund_policy")
-  approvedById       String?      @map("approved_by_id")
-  organizer          Organizer    @relation(fields: [organizerId], references: [id], onDelete: Cascade)
-  venue              Venue        @relation(fields: [venueId], references: [id], onDelete: Restrict)
-  approvedBy         User?        @relation("ApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
-  tickets            Ticket[]
-  ticketTypes        TicketType[]
-  createdAt          DateTime     @default(now()) @map("created_at")
-  updatedAt          DateTime     @updatedAt @map("updated_at")
-  eventDates         EventDate[]
+  isPublic           Boolean     @map("is_public")
+  requiresApproval   Boolean     @map("requires_approval")
+  waitingListEnabled Boolean     @map("waiting_list_enabled")
+  refundPolicy       String?     @map("refund_policy")
+  approvedById       String?     @map("approved_by_id")
+
+  // Ticket limits
+  maxTicketsPerEvent Int          @default(20) @map("max_tickets_per_event") // Default 20 for free users
+  isPremiumEvent     Boolean      @default(false) @map("is_premium_event") // Flag for premium events
+  premiumTierId      String?      @map("premium_tier_id") // Reference to the premium tier
+  premiumTier        PremiumTier? @relation(fields: [premiumTierId], references: [id])
+  ticketsSold        Int          @default(0) @map("tickets_sold")
+
+  organizer   Organizer    @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  venue       Venue        @relation(fields: [venueId], references: [id], onDelete: Restrict)
+  approvedBy  User?        @relation("ApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  tickets     Ticket[]
+  ticketTypes TicketType[]
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  eventDates  EventDate[]
 
   heroImageUrl      String?  @map("hero_image_url")
   carouselImageUrls String[] @map("carousel_image_urls")
 
   @@index([organizerId])
   @@index([approvedById])
+  @@index([premiumTierId])
   @@map("event")
+}
+
+// Premium tier model for different levels of premium events
+model PremiumTier {
+  id                 String   @id @default(uuid())
+  name               String // e.g., "Basic", "Standard", "Pro"
+  description        String?
+  maxTicketsPerEvent Int // Maximum number of tickets allowed for this tier
+  price              Decimal // Price for this tier
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  events             Event[]
+
+  @@map("premium_tier")
 }
 
 model EventDate {
