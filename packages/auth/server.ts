@@ -109,7 +109,7 @@ const options = {
         admin: adminRole,
         customer: customerRole,
       },
-      adminRoles: ['super_admin', 'admin'],
+      adminRoles: ['super-admin', 'admin'],
     }),
     organization({
       ac,

@@ -42,7 +42,7 @@ const users = [
     email: 'admin@ticketcare.com',
     name: 'Admin',
     emailVerified: true,
-    role: 'super_admin',
+    role: 'super-admin',
     organization: 'ticket-care',
   },
 ];
