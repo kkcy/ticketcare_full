@@ -1,12 +1,16 @@
 'use server';
 
 import { auth } from '@repo/auth/server';
-import { database, serializePrisma, type PrismaNamespace } from '@repo/database';
+import {
+  type PrismaNamespace,
+  database,
+  serializePrisma,
+} from '@repo/database';
 import { revalidatePath } from 'next/cache';
 import { headers } from 'next/headers';
 
 // Get all premium tiers
-export async function getPremiumTiers() {
+export async function adminGetPremiumTiers() {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -25,7 +29,9 @@ export async function getPremiumTiers() {
 }
 
 // Create a new premium tier
-export async function createPremiumTier(values: PrismaNamespace.PremiumTierUncheckedCreateInput) {
+export async function createPremiumTier(
+  values: PrismaNamespace.PremiumTierUncheckedCreateInput
+) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -42,11 +48,14 @@ export async function createPremiumTier(values: PrismaNamespace.PremiumTierUnche
 
   return {
     success: true,
-  }
+  };
 }
 
 // Update an existing premium tier
-export async function updatePremiumTier(id: string, values: PrismaNamespace.PremiumTierUncheckedUpdateInput) {
+export async function updatePremiumTier(
+  id: string,
+  values: PrismaNamespace.PremiumTierUncheckedUpdateInput
+) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -65,7 +74,7 @@ export async function updatePremiumTier(id: string, values: PrismaNamespace.Prem
 
   return {
     success: true,
-  }
+  };
 }
 
 // Delete a premium tier
@@ -100,7 +109,7 @@ export async function deletePremiumTier(id: string) {
 
   return {
     success: true,
-  }
+  };
 }
 
 // Get a specific premium tier by ID

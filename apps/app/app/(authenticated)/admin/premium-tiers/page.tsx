@@ -1,22 +1,22 @@
-import { auth } from '@repo/auth/server'
-import { headers } from 'next/headers'
-import { redirect } from 'next/navigation'
-import { Header } from '../../components/header'
-import { getPremiumTiers } from './actions'
-import { PremiumTierCard } from './components/PremiumTierCard'
-import { PremiumTierDialog } from './components/PremiumTierDialog'
+import { auth } from '@repo/auth/server';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { Header } from '../../components/header';
+import { adminGetPremiumTiers } from './actions';
+import { PremiumTierCard } from './components/PremiumTierCard';
+import { PremiumTierDialog } from './components/PremiumTierDialog';
 
 export default async function PremiumTiersPage() {
   const session = await auth.api.getSession({
-    headers: await headers()
-  })
+    headers: await headers(),
+  });
 
   // Check if user is a super admin
   if (!session?.user?.role || session.user.role !== 'super-admin') {
-    redirect('/')
+    redirect('/');
   }
 
-  const tiers = await getPremiumTiers()
+  const tiers = await adminGetPremiumTiers();
 
   return (
     <>
@@ -46,5 +46,5 @@ export default async function PremiumTiersPage() {
         )}
       </div>
     </>
-  )
+  );
 }

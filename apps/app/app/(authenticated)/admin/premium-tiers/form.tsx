@@ -1,11 +1,11 @@
-'use client'
+'use client';
 
-import type { SerializedPremiumTier } from '@/types'
+import type { SerializedPremiumTier } from '@/types';
 
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation';
 
-import type { PrismaNamespace } from '@repo/database'
-import { Button } from '@repo/design-system/components/ui/button'
+import type { PrismaNamespace } from '@repo/database';
+import { Button } from '@repo/design-system/components/ui/button';
 import {
   Form,
   FormControl,
@@ -14,23 +14,27 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  useForm
-} from '@repo/design-system/components/ui/form'
-import { Input } from '@repo/design-system/components/ui/input'
-import { Switch } from '@repo/design-system/components/ui/switch'
-import { toast } from '@repo/design-system/components/ui/sonner'
-import { Textarea } from '@repo/design-system/components/ui/textarea'
+  useForm,
+} from '@repo/design-system/components/ui/form';
+import { Input } from '@repo/design-system/components/ui/input';
+import { toast } from '@repo/design-system/components/ui/sonner';
+import { Switch } from '@repo/design-system/components/ui/switch';
+import { Textarea } from '@repo/design-system/components/ui/textarea';
 
-import { createPremiumTier, updatePremiumTier } from './actions'
+import { createPremiumTier, updatePremiumTier } from './actions';
 
 interface PremiumTierFormProps {
-  setOpen?: (open: boolean) => void
-  mode?: 'create' | 'edit'
-  premiumTier?: SerializedPremiumTier
+  setOpen?: (open: boolean) => void;
+  mode?: 'create' | 'edit';
+  premiumTier?: SerializedPremiumTier;
 }
 
-export function PremiumTierForm({ setOpen, mode = 'create', premiumTier }: PremiumTierFormProps) {
-  const router = useRouter()
+export function PremiumTierForm({
+  setOpen,
+  mode = 'create',
+  premiumTier,
+}: PremiumTierFormProps) {
+  const router = useRouter();
 
   const form = useForm<PrismaNamespace.PremiumTierUncheckedCreateInput>({
     defaultValues: premiumTier
@@ -39,33 +43,36 @@ export function PremiumTierForm({ setOpen, mode = 'create', premiumTier }: Premi
           description: premiumTier.description || '',
           maxTicketsPerEvent: premiumTier.maxTicketsPerEvent,
           price: premiumTier.price,
-          isActive: premiumTier.isActive
+          isActive: premiumTier.isActive,
         }
       : {
           name: '',
           description: '',
           maxTicketsPerEvent: 100,
           price: 0,
-          isActive: false
-        }
-  })
+          isActive: false,
+        },
+  });
 
-  async function onSubmit(values: PrismaNamespace.PremiumTierUncheckedCreateInput) {
+  async function onSubmit(
+    values: PrismaNamespace.PremiumTierUncheckedCreateInput
+  ) {
     try {
       if (mode === 'edit' && premiumTier?.id) {
-        await updatePremiumTier(premiumTier.id, values)
-        toast.success('Premium tier updated successfully')
+        await updatePremiumTier(premiumTier.id, values);
+        toast.success('Premium tier updated successfully');
       } else {
-        await createPremiumTier(values)
-        toast.success('Premium tier created successfully')
+        await createPremiumTier(values);
+        toast.success('Premium tier created successfully');
       }
 
-      setOpen?.(false)
-      router.refresh()
+      setOpen?.(false);
+      router.refresh();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Something went wrong'
+      const errorMessage =
+        error instanceof Error ? error.message : 'Something went wrong';
 
-      toast.error(errorMessage)
+      toast.error(errorMessage);
     }
   }
 
@@ -84,7 +91,9 @@ export function PremiumTierForm({ setOpen, mode = 'create', premiumTier }: Premi
               <FormControl>
                 <Input placeholder="Premium Tier Name" {...field} />
               </FormControl>
-              <FormDescription>E.g., "Basic", "Standard", "Pro"</FormDescription>
+              <FormDescription>
+                E.g., "Basic", "Standard", "Pro"
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -124,11 +133,15 @@ export function PremiumTierForm({ setOpen, mode = 'create', premiumTier }: Premi
                     min={1}
                     max={10000}
                     {...field}
-                    onChange={(e) => field.onChange(Number.parseInt(e.target.value) || 100)}
+                    onChange={(e) =>
+                      field.onChange(Number.parseInt(e.target.value) || 100)
+                    }
                     value={field.value}
                   />
                 </FormControl>
-                <FormDescription>Maximum number of tickets that can be sold</FormDescription>
+                <FormDescription>
+                  Maximum number of tickets that can be sold
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -146,11 +159,15 @@ export function PremiumTierForm({ setOpen, mode = 'create', premiumTier }: Premi
                     min={0}
                     step="0.01"
                     {...field}
-                    onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
+                    onChange={(e) =>
+                      field.onChange(Number.parseFloat(e.target.value) || 0)
+                    }
                     value={field.value}
                   />
                 </FormControl>
-                <FormDescription>Cost of this premium tier in dollars</FormDescription>
+                <FormDescription>
+                  Cost of this premium tier in dollars
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -169,16 +186,23 @@ export function PremiumTierForm({ setOpen, mode = 'create', premiumTier }: Premi
                 </FormDescription>
               </div>
               <FormControl>
-                <Switch checked={field.value} onCheckedChange={field.onChange} />
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
               </FormControl>
             </FormItem>
           )}
         />
 
-        <Button disabled={form.formState.isSubmitting} type="submit" className="max-md:w-full">
+        <Button
+          disabled={form.formState.isSubmitting}
+          type="submit"
+          className="max-md:w-full"
+        >
           {mode === 'create' ? 'Create Premium Tier' : 'Update Premium Tier'}
         </Button>
       </form>
     </Form>
-  )
+  );
 }
