@@ -12,9 +12,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@repo/design-system/components/ui/alert-dialog'
+import { Button } from '@repo/design-system/components/ui/button'
 import { useState } from 'react'
 import { deletePremiumTier } from '../actions'
-import { Button } from '@repo/design-system/components/ui/button'
 
 interface PremiumTierDeleteProps {
   premiumTier: SerializedPremiumTier
@@ -45,7 +45,9 @@ export function PremiumTierDelete({ premiumTier }: PremiumTierDeleteProps) {
 
   return (
     <>
-      <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+      <Button variant="destructive" onClick={handleDelete}>
+        Delete
+      </Button>
 
       <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
         <AlertDialogContent>
@@ -57,7 +59,7 @@ export function PremiumTierDelete({ premiumTier }: PremiumTierDeleteProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirm} disabled={isLoading}>
+            <AlertDialogAction variant="destructive" onClick={handleConfirm} disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
