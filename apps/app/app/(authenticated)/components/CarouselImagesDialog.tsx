@@ -38,13 +38,11 @@ interface CarouselImagesFormValues {
 }
 
 interface CarouselImagesDialogProps {
-  id: string;
   images?: string[];
   onSubmit: (values: CarouselImagesFormValues) => Promise<void>;
 }
 
 export function CarouselImagesDialog({
-  id,
   images,
   onSubmit,
 }: CarouselImagesDialogProps) {

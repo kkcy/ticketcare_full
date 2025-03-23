@@ -110,7 +110,6 @@ export function EventSummary({ event }: EventSummaryProps) {
             <h3 className="font-semibold">Carousel Images</h3>
           </div>
           <CarouselImagesDialog
-            id={event.id}
             images={event.carouselImageUrls}
             onSubmit={async (values) => {
               await updateEvent(event.id, {

@@ -15,7 +15,6 @@ export function VenueMedia({ venue }: { venue: SerializedVenueWithEvents }) {
           <h3 className="font-semibold">Images</h3>
         </div>
         <CarouselImagesDialog
-          id={venue.id}
           images={venue.images}
           onSubmit={async (values) => {
             await updateVenue(venue.id, {
