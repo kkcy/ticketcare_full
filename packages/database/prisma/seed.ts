@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto';
 import {
   EventStatus,
   OrderStatus,
@@ -14,7 +13,6 @@ const prisma = new PrismaClient();
 
 const users = [
   {
-    id: randomUUID(),
     email: 'contact@soundwave.com',
     name: 'Soundwave Productions',
     emailVerified: true,
@@ -22,7 +20,6 @@ const users = [
     organization: 'over-and-above',
   },
   {
-    id: randomUUID(),
     email: 'events@sportsmaster.com',
     name: 'SportsMaster Events',
     emailVerified: true,
@@ -30,21 +27,18 @@ const users = [
     organization: 'city-stadium',
   },
   {
-    id: randomUUID(),
     email: 'john.doe@email.com',
     name: 'John Doe',
     emailVerified: true,
     role: 'customer',
   },
   {
-    id: randomUUID(),
     email: 'jane.smith@email.com',
     name: 'Jane Smith',
     emailVerified: true,
     role: 'customer',
   },
   {
-    id: randomUUID(),
     email: 'admin@ticketcare.com',
     name: 'Admin',
     emailVerified: true,
@@ -77,7 +71,6 @@ async function main() {
   // Create organization
   const ticketCareOrg = await prisma.organization.create({
     data: {
-      id: randomUUID(),
       name: 'TicketCare',
       slug: 'ticket-care',
     },
@@ -85,7 +78,6 @@ async function main() {
 
   const overAndAboveOrg = await prisma.organization.create({
     data: {
-      id: randomUUID(),
       name: 'Over & Above',
       slug: 'over-and-above',
     },
@@ -93,17 +85,17 @@ async function main() {
 
   const cityStadiumOrg = await prisma.organization.create({
     data: {
-      id: randomUUID(),
       name: 'City Stadium',
       slug: 'city-stadium',
     },
   });
 
+  const usersCreated: User[] = [];
+
   // Create users
   for (const userData of users) {
     const user = await prisma.user.create({
       data: {
-        id: userData.id,
         email: userData.email,
         name: userData.name,
         emailVerified: userData.emailVerified,
@@ -117,7 +109,6 @@ async function main() {
 
     await prisma.account.create({
       data: {
-        id: randomUUID(),
         accountId: user.id,
         userId: user.id,
         providerId: 'credential',
@@ -129,7 +120,6 @@ async function main() {
     if (userData.organization) {
       await prisma.member.create({
         data: {
-          id: randomUUID(),
           organizationId:
             userData.organization === 'over-and-above'
               ? overAndAboveOrg.id
@@ -142,13 +132,13 @@ async function main() {
         },
       });
     }
+    usersCreated.push(user);
   }
 
   // Create Organizers
   await prisma.organizer.create({
     data: {
-      id: randomUUID(),
-      userId: users[4].id,
+      userId: usersCreated[4].id,
       name: 'TicketCare',
       slug: 'ticket-care',
       description: 'TicketCare',
@@ -165,8 +155,7 @@ async function main() {
 
   const musicOrganizer = await prisma.organizer.create({
     data: {
-      id: randomUUID(),
-      userId: users[0].id,
+      userId: usersCreated[0].id,
       name: 'Soundwave Productions',
       slug: 'soundwave-productions',
       description: 'Leading music event organizer',
@@ -183,8 +172,7 @@ async function main() {
 
   const sportsOrganizer = await prisma.organizer.create({
     data: {
-      id: randomUUID(),
-      userId: users[1].id,
+      userId: usersCreated[1].id,
       name: 'SportsMaster Events',
       slug: 'sportsmaster-events',
       description: 'Professional sports event management',
@@ -532,7 +520,7 @@ async function main() {
   // Create Orders
   await prisma.order.create({
     data: {
-      userId: users[0].id,
+      userId: usersCreated[0].id,
       status: OrderStatus.completed,
       totalAmount: regularTicketType.price.add(premiumTicketType.price),
       paymentMethod: 'credit_card',
@@ -570,7 +558,7 @@ async function main() {
 
   await prisma.order.create({
     data: {
-      userId: users[0].id,
+      userId: usersCreated[0].id,
       status: OrderStatus.completed,
       totalAmount: frontRowTicketType.price.add(earlyBirdTicketType.price),
       paymentMethod: 'credit_card',
@@ -589,7 +577,7 @@ async function main() {
             ownerName: 'Jane Smith',
             ownerEmail: 'jane.smith@email.com',
             purchaseDate: new Date(),
-            eventId: sportsEvent.id,
+            eventId: musicEvent.id, // Fixed: this should be musicEvent, not sportsEvent
           },
           {
             ticketTypeId: earlyBirdTicketType.id,
@@ -599,7 +587,7 @@ async function main() {
             ownerName: 'Jane Smith',
             ownerEmail: 'jane.smith@email.com',
             purchaseDate: new Date(),
-            eventId: sportsEvent.id,
+            eventId: musicEvent.id, // Fixed: this should be musicEvent, not sportsEvent
           },
         ],
       },

@@ -136,7 +136,6 @@ export function HeroImageDialog({ event }: HeroImageDialogProps) {
 
       await updateEvent(event.id, {
         ...values,
-        venueId: BigInt(event.venueId),
       });
 
       toast.success('Hero image updated successfully');

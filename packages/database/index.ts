@@ -1,4 +1,4 @@
-import 'server-only';
+// import 'server-only';
 
 import { PrismaClient, Prisma as PrismaNamespace } from '@prisma/client';
 
@@ -18,23 +18,17 @@ export type { User, Organization, Organizer } from '@prisma/client';
 
 type SerializedPrisma<T> = T extends PrismaNamespace.Decimal
   ? number
-  : T extends bigint
+  : T extends Date
     ? string
-    : T extends Date
-      ? string
-      : T extends object
-        ? { [K in keyof T]: SerializedPrisma<T[K]> }
-        : T extends Array<infer U>
-          ? SerializedPrisma<U>[]
-          : T;
+    : T extends object
+      ? { [K in keyof T]: SerializedPrisma<T[K]> }
+      : T extends Array<infer U>
+        ? SerializedPrisma<U>[]
+        : T;
 
 export const serializePrisma = <T>(data: T): SerializedPrisma<T> => {
   return JSON.parse(
     JSON.stringify(data, (_, value) => {
-      if (typeof value === 'bigint') {
-        return value.toString();
-      }
-
       if (value instanceof PrismaNamespace.Decimal) {
         return value.toNumber();
       }

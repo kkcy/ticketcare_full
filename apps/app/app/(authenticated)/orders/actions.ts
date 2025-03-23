@@ -96,7 +96,7 @@ export async function searchOrders({
             ? []
             : [
                 {
-                  id: numericSearch,
+                  id: String(numericSearch),
                 },
               ]),
           // Search by name
@@ -203,7 +203,7 @@ export async function searchOrders({
 
 export async function createOrder(data: OrderFormValues) {
   const ticketType = await database.ticketType.findUnique({
-    where: { id: BigInt(data.ticketTypeId) },
+    where: { id: data.ticketTypeId },
   });
 
   if (!ticketType) {
@@ -289,8 +289,8 @@ export async function createOrder(data: OrderFormValues) {
     //   Array.from({ length: data.quantity }).map(async () => {
     //     return tx.ticket.create({
     //       data: {
-    //         eventId: BigInt(data.eventId),
-    //         ticketTypeId: BigInt(data.ticketTypeId),
+    //         eventId: data.eventId,
+    //         ticketTypeId: data.ticketTypeId,
     //         orderId: order.id,
     //         status: 'purchased',
     //         purchaseDate: new Date(),

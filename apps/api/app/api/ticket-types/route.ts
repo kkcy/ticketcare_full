@@ -32,7 +32,7 @@ export const GET = async (request: NextRequest) => {
         contains: query ?? '',
         mode: 'insensitive',
       },
-      eventId: eventId ? BigInt(eventId) : undefined,
+      eventId: eventId ? eventId : undefined,
     },
     select: {
       id: true,

@@ -14,7 +14,7 @@ datasource db {
 //// User model (core entity for all roles)
 
 model User {
-  id            String    @id
+  id            String    @id @default(uuid())
   name          String
   email         String    @unique
   emailVerified Boolean   @map("email_verified")
@@ -49,7 +49,7 @@ model User {
 //// Organization models
 
 model Organization {
-  id          String       @id
+  id          String       @id @default(uuid())
   name        String
   slug        String?
   logo        String?
@@ -65,7 +65,7 @@ model Organization {
 }
 
 model Member {
-  id             String       @id
+  id             String       @id @default(uuid())
   organizationId String       @map("organization_id")
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   userId         String       @map("user_id")
@@ -77,7 +77,7 @@ model Member {
 }
 
 model Invitation {
-  id             String       @id
+  id             String       @id @default(uuid())
   organizationId String       @map("organization_id")
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   email          String
@@ -93,7 +93,7 @@ model Invitation {
 //// Auth models
 
 model Session {
-  id             String   @id
+  id             String   @id @default(uuid())
   expiresAt      DateTime @map("expires_at")
   token          String   @unique
   createdAt      DateTime @default(now()) @map("created_at")
@@ -112,7 +112,7 @@ model Session {
 }
 
 model Account {
-  id                    String    @id
+  id                    String    @id @default(uuid())
   accountId             String?   @map("account_id") // oauth account id
   providerId            String    @map("provider_id") // account type: credential, google, apple, oauth...
   userId                String    @map("user_id")
@@ -131,7 +131,7 @@ model Account {
 }
 
 model Verification {
-  id         String    @id
+  id         String    @id @default(uuid())
   identifier String
   value      String
   expiresAt  DateTime  @map("expires_at")
@@ -175,7 +175,7 @@ model Organizer {
 }
 
 model Venue {
-  id             BigInt   @id @default(autoincrement())
+  id             String   @id @default(uuid())
   name           String
   slug           String   @unique
   description    String?
@@ -204,9 +204,9 @@ model Venue {
 }
 
 model Event {
-  id                 BigInt       @id @default(autoincrement())
-  organizerId        String       @map("organizer_id")
-  venueId            BigInt       @map("venue_id")
+  id                 String      @id @default(uuid())
+  organizerId        String      @map("organizer_id")
+  venueId            String      @map("venue_id")
   title              String
   slug               String       @unique
   description        String?
@@ -238,8 +238,8 @@ model Event {
 }
 
 model EventDate {
-  id        BigInt     @id @default(autoincrement())
-  eventId   BigInt     @map("event_id")
+  id        String     @id @default(uuid())
+  eventId   String     @map("event_id")
   date      DateTime
   event     Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
   timeSlots TimeSlot[]
@@ -251,8 +251,8 @@ model EventDate {
 }
 
 model TimeSlot {
-  id          BigInt      @id @default(autoincrement())
-  eventDateId BigInt      @map("event_date_id")
+  id          String      @id @default(uuid())
+  eventDateId String      @map("event_date_id")
   startTime   DateTime    @map("start_time")
   endTime     DateTime    @map("end_time")
   doorsOpen   DateTime    @map("doors_open")
@@ -268,8 +268,8 @@ model TimeSlot {
 }
 
 model TicketType {
-  id            BigInt      @id @default(autoincrement())
-  eventId       BigInt      @map("event_id")
+  id            String      @id @default(uuid())
+  eventId       String      @map("event_id")
   name          String
   description   String?
   price         Decimal
@@ -289,9 +289,9 @@ model TicketType {
 }
 
 model Inventory {
-  id           BigInt     @id @default(autoincrement())
-  timeSlotId   BigInt     @map("time_slot_id")
-  ticketTypeId BigInt     @map("ticket_type_id")
+  id           String     @id @default(uuid())
+  timeSlotId   String     @map("time_slot_id")
+  ticketTypeId String     @map("ticket_type_id")
   quantity     Int
   timeSlot     TimeSlot   @relation(fields: [timeSlotId], references: [id], onDelete: Cascade)
   ticketType   TicketType @relation(fields: [ticketTypeId], references: [id], onDelete: Cascade)
@@ -305,10 +305,10 @@ model Inventory {
 }
 
 model Ticket {
-  id           BigInt       @id @default(autoincrement())
-  timeSlotId   BigInt       @map("time_slot_id")
-  ticketTypeId BigInt       @map("ticket_type_id")
-  orderId      BigInt?      @map("order_id")
+  id           String       @id @default(uuid())
+  timeSlotId   String       @map("time_slot_id")
+  ticketTypeId String       @map("ticket_type_id")
+  orderId      String?      @map("order_id")
   status       TicketStatus
   purchaseDate DateTime?    @map("purchase_date")
   ownerName    String?      @map("owner_name")
@@ -319,7 +319,7 @@ model Ticket {
   ticketType   TicketType   @relation(fields: [ticketTypeId], references: [id], onDelete: Cascade)
   order        Order?       @relation(fields: [orderId], references: [id], onDelete: SetNull)
   event        Event?       @relation(fields: [eventId], references: [id], onDelete: SetNull)
-  eventId      BigInt?
+  eventId      String?
   createdAt    DateTime     @default(now()) @map("created_at")
   updatedAt    DateTime     @updatedAt @map("updated_at")
 
@@ -344,10 +344,10 @@ model Cart {
 }
 
 model CartItem {
-  id           BigInt     @id @default(autoincrement())
+  id           String     @id @default(uuid())
   cartId       String     @map("cart_id")
-  timeSlotId   BigInt     @map("time_slot_id")
-  ticketTypeId BigInt     @map("ticket_type_id")
+  timeSlotId   String     @map("time_slot_id")
+  ticketTypeId String     @map("ticket_type_id")
   quantity     Int
   cart         Cart       @relation(fields: [cartId], references: [id], onDelete: Cascade)
   timeSlot     TimeSlot   @relation(fields: [timeSlotId], references: [id], onDelete: Cascade)
@@ -363,7 +363,7 @@ model CartItem {
 }
 
 model Order {
-  id            BigInt      @id @default(autoincrement())
+  id            String      @id @default(uuid())
   userId        String      @map("user_id")
   status        OrderStatus
   totalAmount   Decimal     @map("total_amount")

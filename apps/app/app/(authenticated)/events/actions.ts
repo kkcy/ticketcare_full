@@ -66,7 +66,7 @@ export async function updateEvent(
   let finalSlug: string | undefined;
 
   const updatedEvent = await database.event.update({
-    where: { id: BigInt(id) },
+    where: { id },
     data: {
       ...values,
       ...(finalSlug && { slug: finalSlug }),

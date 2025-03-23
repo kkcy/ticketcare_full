@@ -125,8 +125,8 @@ export async function createCart(input: CreateCartInput) {
     const existingCartItem = await database.cartItem.findFirst({
       where: {
         cartId: cart.id,
-        timeSlotId: BigInt(timeSlotId),
-        ticketTypeId: BigInt(ticketTypeId),
+        timeSlotId: timeSlotId,
+        ticketTypeId: ticketTypeId,
       },
     });
 
@@ -141,8 +141,8 @@ export async function createCart(input: CreateCartInput) {
       await database.cartItem.create({
         data: {
           cartId: cart.id,
-          timeSlotId: BigInt(timeSlotId),
-          ticketTypeId: BigInt(ticketTypeId),
+          timeSlotId: timeSlotId,
+          ticketTypeId: ticketTypeId,
           quantity,
         },
       });

@@ -76,7 +76,7 @@ export async function updateEventStatus(
 }
 
 export async function createTicket(
-  eventId: bigint,
+  eventId: string,
   values: {
     ownerName: string;
     ownerEmail: string;
@@ -126,7 +126,7 @@ export async function createTicketType(
   try {
     const ticketType = await database.ticketType.create({
       data: {
-        eventId: BigInt(eventId),
+        eventId: eventId,
         ...ticketTypeData,
       },
     });

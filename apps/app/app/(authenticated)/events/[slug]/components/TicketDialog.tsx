@@ -36,7 +36,7 @@ const ticketFormSchema = z.object({
 type TicketFormValues = z.infer<typeof ticketFormSchema>;
 
 interface TicketDialogProps {
-  eventId: bigint;
+  eventId: string;
 }
 
 export function TicketDialog({ eventId }: TicketDialogProps) {

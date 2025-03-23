@@ -262,7 +262,6 @@ export function CarouselImagesDialog({ event }: CarouselImagesDialogProps) {
 
       await updateEvent(event.id, {
         ...values,
-        venueId: BigInt(event.venueId),
       });
 
       toast.success('Carousel images updated successfully');
