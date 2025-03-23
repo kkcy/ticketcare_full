@@ -65,7 +65,7 @@ export const PastEvents = async () => {
   }
 
   return (
-    <div className="grid min-h-[100vh] flex-1 auto-rows-fr gap-4 md:min-h-min lg:grid-cols-3">
+    <div className="grid min-h-[100vh] flex-1 auto-rows-max gap-4 md:min-h-min lg:grid-cols-3">
       {events.map((event) => (
         <Link key={event.id} href={`/events/${event.slug}`}>
           <Card className="transition-shadow hover:shadow-md">
