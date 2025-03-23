@@ -1,13 +1,13 @@
+import type { SerializedEvent } from '@/types';
 import { StarIcon } from '@repo/design-system/components/icons';
 import { Badge } from '@repo/design-system/components/ui/badge';
-import {} from '@repo/design-system/components/ui/breadcrumb';
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from '@repo/design-system/components/ui/tabs';
-import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import type { ReactElement } from 'react';
 import { Header } from '../../components/header';
 import { EventDialog } from '../components/EventDialog';
@@ -23,22 +23,18 @@ type PageProps = {
   }>;
 };
 
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const event = await getEvent(slug);
-  return {
-    title: `${event.title} - TicketCare`,
-    description: event.description || `Details for ${event.title}`,
-  };
-}
-
 export default async function EventDetailPage({
   params,
 }: PageProps): Promise<ReactElement> {
   const { slug } = await params;
-  const event = await getEvent(slug);
+
+  // Get event by slug
+  let event: SerializedEvent;
+  try {
+    event = await getEvent(slug);
+  } catch (_error) {
+    notFound();
+  }
 
   return (
     <>
