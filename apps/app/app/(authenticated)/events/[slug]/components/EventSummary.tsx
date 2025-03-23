@@ -1,3 +1,5 @@
+'use client';
+
 import type { SerializedEvent } from '@/types';
 import {
   Activity,
@@ -10,7 +12,8 @@ import {
 } from '@repo/design-system/components/icons';
 import Image from 'next/image';
 import { title } from 'radash';
-import { CarouselImagesDialog } from '../../components/CarouselImagesDialog';
+import { CarouselImagesDialog } from '../../../components/CarouselImagesDialog';
+import { updateEvent } from '../../actions';
 import { HeroImageDialog } from '../../components/HeroImageDialog';
 import { ShareButtons } from './ShareButtons';
 
@@ -106,7 +109,15 @@ export function EventSummary({ event }: EventSummaryProps) {
             <Images className="h-4 w-4 text-muted-foreground" />
             <h3 className="font-semibold">Carousel Images</h3>
           </div>
-          <CarouselImagesDialog event={event} />
+          <CarouselImagesDialog
+            id={event.id}
+            images={event.carouselImageUrls}
+            onSubmit={async (values) => {
+              await updateEvent(event.id, {
+                carouselImageUrls: values.images,
+              });
+            }}
+          />
         </div>
         <div className="mt-4">
           {event.carouselImageUrls && event.carouselImageUrls.length > 0 ? (

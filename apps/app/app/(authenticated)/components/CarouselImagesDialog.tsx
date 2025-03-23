@@ -1,7 +1,6 @@
 'use client';
 
 import { env } from '@/env';
-import type { SerializedEvent } from '@/types';
 import { Pencil, Upload } from '@repo/design-system/components/icons';
 import { Button } from '@repo/design-system/components/ui/button';
 import {
@@ -33,23 +32,26 @@ import { useMediaQuery } from '@repo/design-system/hooks/use-media-query';
 import Image from 'next/image';
 import { useState } from 'react';
 import type { ChangeEvent, DragEvent } from 'react';
-import { updateEvent } from '../actions';
 
 interface CarouselImagesFormValues {
-  carouselImageUrls: string[];
+  images: string[];
 }
 
 interface CarouselImagesDialogProps {
-  event: SerializedEvent;
+  id: string;
+  images?: string[];
+  onSubmit: (values: CarouselImagesFormValues) => Promise<void>;
 }
 
-export function CarouselImagesDialog({ event }: CarouselImagesDialogProps) {
+export function CarouselImagesDialog({
+  id,
+  images,
+  onSubmit,
+}: CarouselImagesDialogProps) {
   const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
-  const [carouselImages, setCarouselImages] = useState<string[]>(
-    event?.carouselImageUrls || []
-  );
+  const [carouselImages, setCarouselImages] = useState<string[]>(images ?? []);
   const [uploadingFiles, setUploadingFiles] = useState<Map<string, number>>(
     new Map()
   );
@@ -74,7 +76,7 @@ export function CarouselImagesDialog({ event }: CarouselImagesDialogProps) {
 
   const form = useForm<CarouselImagesFormValues>({
     defaultValues: {
-      carouselImageUrls: event.carouselImageUrls || [],
+      images: carouselImages,
     },
   });
 
@@ -190,7 +192,7 @@ export function CarouselImagesDialog({ event }: CarouselImagesDialogProps) {
               setCarouselImages((prevImages) => {
                 const updatedImages = [...prevImages, response.url];
                 // Update the form value with all images
-                form.setValue('carouselImageUrls', updatedImages);
+                form.setValue('images', updatedImages);
                 return updatedImages;
               });
               toast.success('Image uploaded successfully');
@@ -250,19 +252,14 @@ export function CarouselImagesDialog({ event }: CarouselImagesDialogProps) {
     const updatedImages = [...carouselImages];
     updatedImages.splice(index, 1);
     setCarouselImages(updatedImages);
-    form.setValue('carouselImageUrls', updatedImages);
+    form.setValue('images', updatedImages);
   };
 
-  async function onSubmit(values: CarouselImagesFormValues) {
+  async function formOnSubmit(values: CarouselImagesFormValues) {
     try {
       setIsSaving(true);
-      if (!event?.id) {
-        throw new Error('Event ID is required');
-      }
 
-      await updateEvent(event.id, {
-        ...values,
-      });
+      await onSubmit(values);
 
       toast.success('Carousel images updated successfully');
       setOpen(false);
@@ -279,13 +276,13 @@ export function CarouselImagesDialog({ event }: CarouselImagesDialogProps) {
   const CarouselImagesForm = () => (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(formOnSubmit)}
         className="mx-auto w-full max-w-3xl space-y-4 px-4 md:px-0"
       >
         {/* Carousel Images Upload */}
         <FormField
           control={form.control}
-          name="carouselImageUrls"
+          name="images"
           render={({ field }) => (
             <FormItem>
               <div className="flex flex-col gap-4">
@@ -315,7 +312,9 @@ export function CarouselImagesDialog({ event }: CarouselImagesDialogProps) {
                   </div>
                 )}
                 <div
-                  className={`flex flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed p-6 ${uploadingFiles.size > 0 ? 'opacity-50' : ''}`}
+                  className={`flex flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed p-6 ${
+                    uploadingFiles.size > 0 ? 'opacity-50' : ''
+                  }`}
                   onDragOver={handleDragOver}
                   onDrop={handleDrop}
                   // biome-ignore lint/a11y/useSemanticElements: <explanation>
@@ -376,12 +375,12 @@ export function CarouselImagesDialog({ event }: CarouselImagesDialogProps) {
         <DialogTrigger asChild>
           <Button size="sm" variant="outline">
             <Pencil className="mr-2 h-4 w-4" />
-            Edit Carousel Images
+            Edit Images
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Edit Carousel Images</DialogTitle>
+            <DialogTitle>Edit Images</DialogTitle>
           </DialogHeader>
           <CarouselImagesForm />
         </DialogContent>
@@ -394,12 +393,12 @@ export function CarouselImagesDialog({ event }: CarouselImagesDialogProps) {
       <DrawerTrigger asChild>
         <Button size="sm" variant="outline">
           <Pencil className="mr-2 h-4 w-4" />
-          Edit Carousel Images
+          Edit Images
         </Button>
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="text-left">
-          <DialogTitle>Edit Carousel Images</DialogTitle>
+          <DialogTitle>Edit Images</DialogTitle>
         </DrawerHeader>
         <CarouselImagesForm />
         <DrawerFooter className="pt-2">
