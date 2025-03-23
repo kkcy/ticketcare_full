@@ -1,4 +1,5 @@
 import type { getPremiumTier } from './app/(authenticated)/admin/premium-tiers/actions';
+import type { getOrganizer } from './app/(authenticated)/admin/organizers/actions';
 import type {
   getVenue,
   getVenueBySlug,
@@ -23,3 +24,6 @@ export type SerializedVenue = Awaited<ReturnType<typeof getVenue>>;
 export type SerializedVenueWithEvents = Awaited<
   ReturnType<typeof getVenueBySlug>
 >;
+
+export type SerializedOrganizer = Awaited<ReturnType<typeof getOrganizer>>;
+export type SerializedOrganizers = SerializedOrganizer[];
