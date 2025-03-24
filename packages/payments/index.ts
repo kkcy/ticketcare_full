@@ -7,3 +7,5 @@ export const stripe = new Stripe(keys().STRIPE_SECRET_KEY, {
 });
 
 export type { Stripe } from 'stripe';
+export { chip } from './chip';
+export type { ChipPaymentResponse, CreatePaymentParams } from './chip';
