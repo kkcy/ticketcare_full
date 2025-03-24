@@ -2,7 +2,7 @@ import * as React from "react"
 
 import { cn } from "@repo/design-system/lib/utils"
 
-function Card({ className, shadow = true, ...props }: React.ComponentProps<"div">) {
+function Card({ className, shadow = true, ...props }: React.ComponentProps<"div"> & { shadow?: boolean }) {
   return (
     <div
       data-slot="card"
