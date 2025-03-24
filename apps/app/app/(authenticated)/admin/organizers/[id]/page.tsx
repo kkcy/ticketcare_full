@@ -31,6 +31,22 @@ type PageProps = {
   }>;
 };
 
+// Helper function to determine badge variant based on verification status
+function getVerificationBadgeVariant(
+  status: string
+): 'outline' | 'pending' | 'success' | 'destructive' {
+  switch (status) {
+    case 'VERIFIED':
+      return 'success';
+    case 'PENDING':
+      return 'pending';
+    case 'REJECTED':
+      return 'destructive';
+    default:
+      return 'outline';
+  }
+}
+
 export default async function OrganizerDetailPage({ params }: PageProps) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -122,9 +138,15 @@ export default async function OrganizerDetailPage({ params }: PageProps) {
                     </dt>
                     <dd>
                       <Badge
-                        variant={organizer.isPremium ? 'success' : 'outline'}
+                        variant={
+                          organizer.verificationStatus === 'VERIFIED'
+                            ? 'success'
+                            : 'outline'
+                        }
                       >
-                        {organizer.isPremium ? 'Premium' : 'Free'}
+                        {organizer.verificationStatus === 'VERIFIED'
+                          ? 'Verified'
+                          : 'Pending'}
                       </Badge>
                     </dd>
                   </div>
@@ -184,15 +206,9 @@ export default async function OrganizerDetailPage({ params }: PageProps) {
                     </dt>
                     <dd>
                       <Badge
-                        variant={
-                          organizer.verificationStatus === 'VERIFIED'
-                            ? 'success'
-                            : organizer.verificationStatus === 'PENDING'
-                              ? 'pending'
-                              : organizer.verificationStatus === 'REJECTED'
-                                ? 'destructive'
-                                : 'outline'
-                        }
+                        variant={getVerificationBadgeVariant(
+                          organizer.verificationStatus
+                        )}
                       >
                         {organizer.verificationStatus}
                       </Badge>
@@ -219,14 +235,6 @@ export default async function OrganizerDetailPage({ params }: PageProps) {
                         : 'Not set'}
                     </dd>
                   </div>
-                  {organizer.isPremium && (
-                    <div>
-                      <dt className="font-medium text-muted-foreground text-sm">
-                        Event Credits
-                      </dt>
-                      <dd>{organizer.eventCredits}</dd>
-                    </div>
-                  )}
                 </dl>
               </CardContent>
             </Card>

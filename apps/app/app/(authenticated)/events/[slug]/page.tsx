@@ -16,6 +16,8 @@ import { EventReports } from './components/EventReports';
 import { EventStatus } from './components/EventStatus';
 import { EventSummary } from './components/EventSummary';
 import { EventTickets } from './components/EventTickets';
+import { EventUpgradeDialog } from './components/EventUpgradeDialog';
+import { UpgradeNotification } from './components/UpgradeNotification';
 
 type PageProps = {
   readonly params: Promise<{
@@ -38,6 +40,8 @@ export default async function EventDetailPage({
 
   return (
     <>
+      <UpgradeNotification />
+
       <Header pages={['Events']} page={event.title} />
 
       <main className="flex-1 space-y-4 p-4 pt-6 md:p-8">
@@ -69,6 +73,7 @@ export default async function EventDetailPage({
               <TabsTrigger value="tickets">Tickets</TabsTrigger>
             </TabsList>
             <div className="flex items-center gap-2">
+              <EventUpgradeDialog event={event} />
               <EventStatus event={event} />
               <EventDialog mode="edit" event={event} />
             </div>

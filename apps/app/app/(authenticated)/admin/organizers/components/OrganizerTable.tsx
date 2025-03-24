@@ -1,5 +1,6 @@
 'use client';
 
+import type { SerializedOrganizer } from '@/types';
 import { Badge } from '@repo/design-system/components/ui/badge';
 import { Button } from '@repo/design-system/components/ui/button';
 import { Input } from '@repo/design-system/components/ui/input';
@@ -25,7 +26,6 @@ import { format } from 'date-fns';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 import useSWR from 'swr';
-import type { SerializedOrganizer } from '../../../../../types';
 
 interface OrganizerTableProps {
   initialData: SerializedOrganizer[];
@@ -54,19 +54,28 @@ export function OrganizerTable({ initialData }: OrganizerTableProps) {
       header: 'Email',
     },
     {
-      accessorKey: 'isPremium',
+      accessorKey: 'verificationStatus',
       header: 'Status',
       cell: ({ row }) => {
+        // Show verification status as the main status indicator
         return (
-          <Badge variant={row.original.isPremium ? 'success' : 'outline'}>
-            {row.original.isPremium ? 'Premium' : 'Free'}
+          <Badge
+            variant={
+              row.original.verificationStatus === 'VERIFIED'
+                ? 'success'
+                : 'outline'
+            }
+          >
+            {row.original.verificationStatus === 'VERIFIED'
+              ? 'Verified'
+              : 'Pending'}
           </Badge>
         );
       },
     },
     {
       accessorKey: 'verificationStatus',
-      header: 'Verification',
+      header: 'Verification Details',
       cell: ({ row }) => {
         const status = row.original.verificationStatus;
         let variant: 'outline' | 'pending' | 'success' | 'destructive' =
@@ -87,13 +96,6 @@ export function OrganizerTable({ initialData }: OrganizerTableProps) {
             {status.charAt(0) + status.slice(1).toLowerCase()}
           </Badge>
         );
-      },
-    },
-    {
-      accessorKey: 'eventCredits',
-      header: 'Event Credits',
-      cell: ({ row }) => {
-        return row.original.isPremium ? row.original.eventCredits : 'N/A';
       },
     },
     {

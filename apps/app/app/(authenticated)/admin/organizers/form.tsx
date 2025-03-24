@@ -52,8 +52,6 @@ export function OrganizerForm({
           emailNotifications: organizer.emailNotifications,
           smsNotifications: organizer.smsNotifications,
           pushNotifications: organizer.pushNotifications,
-          isPremium: organizer.isPremium,
-          eventCredits: organizer.eventCredits,
           userId: organizer.userId,
         }
       : {
@@ -67,8 +65,6 @@ export function OrganizerForm({
           emailNotifications: true,
           smsNotifications: false,
           pushNotifications: false,
-          isPremium: false,
-          eventCredits: 0,
         },
   });
 
@@ -339,58 +335,7 @@ export function OrganizerForm({
               <FormMessage />
             </FormItem>
           )}
-        />
-
-        <div className="space-y-4">
-          <FormField
-            control={form.control}
-            name="isPremium"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-base">Premium Status</FormLabel>
-                  <FormDescription>
-                    Premium organizers get additional event credits and higher
-                    ticket sales limits
-                  </FormDescription>
-                </div>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          {form.watch('isPremium') && (
-            <FormField
-              control={form.control}
-              name="eventCredits"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Event Credits</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={0}
-                      {...field}
-                      onChange={(e) =>
-                        field.onChange(Number.parseInt(e.target.value) || 0)
-                      }
-                      value={field.value}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Additional event credits for premium organizers
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-        </div> */}
+        /> */}
 
         <Button
           disabled={form.formState.isSubmitting}

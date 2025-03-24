@@ -23,14 +23,9 @@ export async function createEvent(
     throw new Error('Not an organizer');
   }
 
-  // Get the organizer to check premium status
+  // Get the organizer
   const organizer = await database.organizer.findUnique({
     where: { id: session.session.organizerId },
-    select: {
-      isPremium: true,
-      eventCredits: true,
-      eventCreditsUsed: true,
-    },
   });
 
   if (!organizer) {
@@ -38,25 +33,12 @@ export async function createEvent(
   }
 
   // Handle premium event creation
-  if (values.isPremiumEvent) {
-    // Check if organizer is premium or has event credits
-    if (
-      !organizer.isPremium &&
-      organizer.eventCredits <= organizer.eventCreditsUsed
-    ) {
-      throw new Error(
-        'You need to upgrade to premium or purchase more event credits to create a premium event'
-      );
-    }
-
-    // Increment event credits used if not a premium user
-    if (!organizer.isPremium) {
-      await database.organizer.update({
-        where: { id: session.session.organizerId },
-        data: { eventCreditsUsed: { increment: 1 } },
-      });
-    }
+  if (values.isPremiumEvent && !values.premiumTierId) {
+    throw new Error('Premium tier must be specified for premium events');
   }
+
+  // For premium events, we'll create the event first, then handle the premium upgrade separately
+  // The EventPremiumUpgrade model will track the premium status
 
   // Enforce ticket limits for free users
   let maxTickets = values.maxTicketsPerEvent || 20;
@@ -110,39 +92,12 @@ export async function updateEvent(
   }
 
   // Check if upgrading to premium event
-  if (!currentEvent.isPremiumEvent && values.isPremiumEvent) {
-    // Get the organizer to check premium status
-    const organizer = await database.organizer.findUnique({
-      where: { id: currentEvent.organizerId },
-      select: {
-        isPremium: true,
-        eventCredits: true,
-        eventCreditsUsed: true,
-      },
-    });
-
-    if (!organizer) {
-      throw new Error('Organizer not found');
-    }
-
-    // Check if organizer is premium or has event credits
-    if (
-      !organizer.isPremium &&
-      organizer.eventCredits <= organizer.eventCreditsUsed
-    ) {
-      throw new Error(
-        'You need to upgrade to premium or purchase more event credits to upgrade to a premium event'
-      );
-    }
-
-    // Increment event credits used if not a premium user
-    if (!organizer.isPremium) {
-      await database.organizer.update({
-        where: { id: currentEvent.organizerId },
-        data: { eventCreditsUsed: { increment: 1 } },
-      });
-    }
+  if (!currentEvent.isPremiumEvent && values.isPremiumEvent && !values.premiumTierId) {
+    throw new Error('Premium tier must be specified for premium events');
   }
+  
+  // For premium events, the EventPremiumUpgrade model will track the premium status
+  // No need to check organizer status as we're using the premium upgrade model
 
   // Enforce ticket limits for free events
   let maxTickets = values.maxTicketsPerEvent as number;

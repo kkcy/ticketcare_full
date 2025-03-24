@@ -28,7 +28,7 @@ import {
 import { toast } from '@repo/design-system/components/ui/sonner';
 import { Textarea } from '@repo/design-system/components/ui/textarea';
 import { title } from 'radash';
-import { getPremiumTiers } from '../admin/premium-tiers/actions';
+import { getPremiumTiers } from './[slug]/actions';
 import { createEvent, updateEvent } from './actions';
 import { VenueAutocomplete } from './components/VenueAutocomplete';
 
