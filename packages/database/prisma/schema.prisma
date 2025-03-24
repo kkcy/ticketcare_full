@@ -244,6 +244,7 @@ model Event {
 
   heroImageUrl      String?  @map("hero_image_url")
   carouselImageUrls String[] @map("carousel_image_urls")
+  orders            Order[]  @relation("EventOrders")
 
   @@index([organizerId])
   @@index([approvedById])
@@ -394,6 +395,7 @@ model CartItem {
 model Order {
   id            String      @id @default(uuid())
   userId        String      @map("user_id")
+  eventId       String?     @map("event_id")
   status        OrderStatus
   totalAmount   Decimal     @map("total_amount")
   paymentMethod String      @map("payment_method")
@@ -403,9 +405,11 @@ model Order {
   createdAt     DateTime    @default(now()) @map("created_at")
   updatedAt     DateTime    @updatedAt @map("updated_at")
   user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event         Event?      @relation("EventOrders", fields: [eventId], references: [id], onDelete: SetNull)
   tickets       Ticket[]
 
   @@index([userId])
+  @@index([eventId])
   @@map("order")
 }
 
