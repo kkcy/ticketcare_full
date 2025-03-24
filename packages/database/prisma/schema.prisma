@@ -170,10 +170,8 @@ model Organizer {
   createdAt          DateTime           @default(now()) @map("created_at")
   updatedAt          DateTime           @updatedAt @map("updated_at")
 
-  // Organizer plan properties
-  isPremium        Boolean @default(false) @map("is_premium")
-  eventCredits     Int     @default(0) @map("event_credits") // Additional credits for premium users
-  eventCreditsUsed Int     @default(0) @map("event_credits_used")
+  // Premium event upgrades
+  premiumUpgrades EventPremiumUpgrade[]
 
   @@index([userId])
   @@map("organizer")
@@ -242,9 +240,10 @@ model Event {
   updatedAt   DateTime     @updatedAt @map("updated_at")
   eventDates  EventDate[]
 
-  heroImageUrl      String?  @map("hero_image_url")
-  carouselImageUrls String[] @map("carousel_image_urls")
-  orders            Order[]  @relation("EventOrders")
+  heroImageUrl      String?               @map("hero_image_url")
+  carouselImageUrls String[]              @map("carousel_image_urls")
+  orders            Order[]               @relation("EventOrders")
+  premiumUpgrades   EventPremiumUpgrade[]
 
   @@index([organizerId])
   @@index([approvedById])
@@ -254,15 +253,16 @@ model Event {
 
 // Premium tier model for different levels of premium events
 model PremiumTier {
-  id                 String   @id @default(uuid())
+  id                 String                @id @default(uuid())
   name               String // e.g., "Basic", "Standard", "Pro"
   description        String?
   maxTicketsPerEvent Int // Maximum number of tickets allowed for this tier
   price              Decimal // Price for this tier
-  isActive           Boolean  @default(true)
-  createdAt          DateTime @default(now()) @map("created_at")
-  updatedAt          DateTime @updatedAt @map("updated_at")
+  isActive           Boolean               @default(true)
+  createdAt          DateTime              @default(now()) @map("created_at")
+  updatedAt          DateTime              @updatedAt @map("updated_at")
   events             Event[]
+  premiumUpgrades    EventPremiumUpgrade[]
 
   @@map("premium_tier")
 }
@@ -413,6 +413,28 @@ model Order {
   @@map("order")
 }
 
+model EventPremiumUpgrade {
+  id            String                    @id
+  eventId       String                    @map("event_id")
+  organizerId   String                    @map("organizer_id")
+  premiumTierId String?                   @map("premium_tier_id")
+  amount        Decimal
+  status        EventPremiumUpgradeStatus @default(pending)
+  metadata      Json? // For storing additional data like upgradeType, paymentMethod, etc.
+  createdAt     DateTime                  @default(now()) @map("created_at")
+  updatedAt     DateTime                  @updatedAt @map("updated_at")
+
+  // Relations
+  event       Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  organizer   Organizer    @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  premiumTier PremiumTier? @relation(fields: [premiumTierId], references: [id], onDelete: SetNull)
+
+  @@index([eventId])
+  @@index([organizerId])
+  @@index([premiumTierId])
+  @@map("event_premium_upgrade")
+}
+
 //// Enums
 
 enum VerificationStatus {
@@ -453,4 +475,11 @@ enum CartStatus {
   expired
   converted
   abandoned
+}
+
+enum EventPremiumUpgradeStatus {
+  pending
+  completed
+  failed
+  cancelled
 }

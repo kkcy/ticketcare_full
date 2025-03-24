@@ -202,7 +202,6 @@ async function main() {
       emailNotifications: true,
       smsNotifications: true,
       pushNotifications: true,
-      isPremium: true, // This organizer has premium status
     },
   });
 
@@ -220,7 +219,6 @@ async function main() {
       emailNotifications: true,
       smsNotifications: false,
       pushNotifications: true,
-      isPremium: false, // This organizer has free status
     },
   });
 
