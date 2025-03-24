@@ -51,6 +51,17 @@ export const PaymentDetails: FC = () => {
           <span>E-Wallet</span>
           <Image src="/wallet.png" alt="E-Wallet" width={80} height={24} />
         </ToggleGroupItem>
+        <ToggleGroupItem
+          value="chip"
+          className="flex h-[64px] w-full items-center justify-between rounded-md border p-[16px] data-[state=on]:bg-orange-500 data-[state=on]:text-white"
+        >
+          <span>Chip-In Asia</span>
+          <div className="flex items-center space-x-2">
+            <span className="font-medium text-sm">
+              Multiple payment methods
+            </span>
+          </div>
+        </ToggleGroupItem>
       </ToggleGroup>
 
       {form.watch('paymentMethod') === 'card' && (

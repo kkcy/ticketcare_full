@@ -1,8 +1,10 @@
 'use server';
 import { auth } from '@repo/auth/server';
 import { database, serializePrisma } from '@repo/database';
+import { chip } from '@repo/payments';
 import { cookies } from 'next/headers';
 import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
 import type { CheckoutFormValues } from './components/checkout-form';
 
 // const checkoutFormSchema = z.object({
@@ -25,96 +27,132 @@ export async function checkout(formData: CheckoutFormValues, cartId: string) {
     throw new Error('Invalid cart');
   }
 
-  // get logged in user
+  // Get cart details
+  const cart = await database.cart.findUnique({
+    where: { id: cartId },
+    include: {
+      cartItems: {
+        include: {
+          timeSlot: true,
+          ticketType: {
+            include: {
+              event: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!cart) {
+    throw new Error('Cart not found');
+  }
+
+  if (cart.expiresAt < new Date()) {
+    throw new Error('Cart has expired');
+  }
+
+  // Calculate total amount
+  const totalAmount = cart.cartItems.reduce((sum, item) => {
+    // Convert Decimal to number for calculation
+    const price = item.ticketType?.price
+      ? Number.parseFloat(item.ticketType.price.toString())
+      : 0;
+    return sum + price * item.quantity;
+  }, 0);
+
+  // Get logged in user or use form data
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-  const userData: any = null;
 
-  // try {
-  //   // if user not logged in
-  //   if (!session?.user) {
-  //     // check if email exists in users
-  //     const existingUser = await database.user.findUnique({
-  //       where: {
-  //         email: formData.email,
-  //       }
-  //     })
+  const userId = session?.user?.id;
+  const userEmail = session?.user?.email || formData.email;
+  const userName = session?.user?.name || formData.fullName;
+  const userPhone = formData.phone;
 
-  //     userData = existingUser
-  //   } else {
-  //     userData = session.user
-  //   }
+  // Get the event ID from the first cart item
+  const eventId = cart.cartItems[0]?.ticketType?.eventId;
 
-  //   if (!userData) {
-  //     // create new user
-  //     const newUser = await auth.api.createUser({
-  //       body: {
-  //         email: formData.email,
-  //         name: formData.fullName,
-  //         data: {
-  //           phone: formData.phone,
-  //         }
-  //       }
-  //     })
+  // Create order in database
+  const order = await database.order.create({
+    data: {
+      userId: userId || '',
+      eventId: eventId,
+      totalAmount,
+      status: 'pending',
+      paymentMethod: formData.paymentMethod,
+      transactionId: '',
+      paymentStatus: 'pending',
+      orderedAt: new Date(),
+    },
+  });
 
-  //     userData = newUser
-  //   }
+  // Handle different payment methods
+  if (formData.paymentMethod === 'chip') {
+    try {
+      // Check if the event is premium (important for ticket sales limits)
+      const isPremiumEvent =
+        cart.cartItems[0]?.ticketType?.event?.isPremiumEvent || false;
 
-  //   const { firstName, lastName } = parseFullName(formData.fullName)
+      // Prepare products for Chip-In
+      const products = cart.cartItems.map((item) => ({
+        name: item.ticketType?.name || 'Ticket',
+        quantity: item.quantity,
+        price: item.ticketType?.price
+          ? Number.parseFloat(item.ticketType.price.toString())
+          : 0,
+        description: `${item.ticketType?.event?.title || 'Event'} - ${item.ticketType?.name || 'Ticket'}`,
+      }));
 
-  //   // Then run all database operations in a transaction
-  //   await database.$transaction(async (tx) => {
-  //     // Find existing user
-  //     const user = await database.user.findUnique({
-  //       where: {
-  //         id: userData.user.id,
-  //         email: formData.email,
-  //       },
-  //     })
+      // Create payment with Chip-In
+      const payment = await chip.createPayment({
+        amount: totalAmount,
+        currency: 'MYR',
+        products,
+        email: userEmail,
+        fullName: userName,
+        phone: userPhone,
+        reference: `Order #${order.id}`,
+        successUrl: `${process.env.NEXT_PUBLIC_API_URL}/webhooks/chip/success`,
+        failureUrl: `${process.env.NEXT_PUBLIC_API_URL}/webhooks/chip/failure`,
+        successRedirectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/confirmation/${order.id}?status=success`,
+        failureRedirectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/confirmation/${order.id}?status=failure`,
+        metadata: {
+          orderId: order.id,
+          isPremiumEvent: isPremiumEvent.toString(),
+        },
+      });
 
-  //     if (!user) {
-  //       // Create user
-  //       await tx.user.create({
-  //         data: {
-  //           id: userData.user!.id!,
-  //           email: formData.email,
-  //           name: firstName,
-  //           phone: formData.phone,
-  //         },
-  //       })
-  //     }
+      // Update order with payment ID
+      await database.order.update({
+        where: { id: order.id },
+        data: {
+          transactionId: payment.id,
+        },
+      });
 
-  //     // Update cart with user ID
-  //     await tx.cart.update({
-  //       where: {
-  //         id: cartId,
-  //       },
-  //       data: {
-  //         userId: userData.user?.id,
-  //         status: CartStatus.converted,
-  //       },
-  //     })
-  //   })
+      // Clear cart
+      await database.cart.delete({
+        where: { id: cartId },
+      });
 
-  //   return {
-  //     success: true,
-  //     userId: userData.user?.id,
-  //   }
-  // } catch (error) {
-  //   // If any error occurs and we created a new user, attempt to delete it
-  //   if (userData?.user?.id) {
-  //     // await auth.api.deleteUser({
-  //     //   userId: userData.user.id,
-  //     // })
-  //   }
-
-  //   throw error
-  // }
-
-  return {
-    success: true,
-  };
+      // Redirect to Chip-In checkout page
+      if (payment.checkout_url) {
+        redirect(payment.checkout_url);
+      }
+    } catch (error) {
+      console.error('Chip payment error:', error);
+      throw new Error('Failed to process payment with Chip-In');
+    }
+  } else {
+    // Handle other payment methods here
+    // For now, just return success
+    return {
+      success: true,
+      orderId: order.id,
+    };
+  }
 }
 
 export async function setCartCookie(cartId: string) {

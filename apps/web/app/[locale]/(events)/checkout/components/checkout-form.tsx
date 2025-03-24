@@ -55,7 +55,7 @@ export const checkoutFormSchema = z.object({
   //   message: 'You must accept the terms and conditions',
   // }),
   acceptMarketing: z.boolean().optional(),
-  paymentMethod: z.enum(['fpx', 'card', 'wallet']),
+  paymentMethod: z.enum(['fpx', 'card', 'wallet', 'chip']),
 });
 
 export type CheckoutFormValues = z.infer<typeof checkoutFormSchema>;
