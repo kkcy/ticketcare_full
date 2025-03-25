@@ -1,4 +1,13 @@
 import { auth } from '@repo/auth/server';
+import {
+  ArrowLeft,
+  Bell,
+  ClipboardCheck,
+  Clock,
+  Phone,
+  StarIcon,
+  User,
+} from '@repo/design-system/components/icons';
 import { Badge } from '@repo/design-system/components/ui/badge';
 import { Button } from '@repo/design-system/components/ui/button';
 import {
@@ -8,15 +17,6 @@ import {
   CardTitle,
 } from '@repo/design-system/components/ui/card';
 import { formatDate } from '@repo/design-system/lib/format';
-import {
-  ArrowLeft,
-  Bell,
-  ClipboardCheck,
-  Clock,
-  Phone,
-  StarIcon,
-  User,
-} from 'lucide-react';
 import { headers } from 'next/headers';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';

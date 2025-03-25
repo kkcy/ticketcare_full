@@ -2,6 +2,7 @@
 
 import { updateOrganizer } from '@/app/(authenticated)/admin/organizers/actions';
 import type { PrismaNamespace } from '@repo/database';
+import { Pencil } from '@repo/design-system/components/icons';
 import { Button } from '@repo/design-system/components/ui/button';
 import {} from '@repo/design-system/components/ui/card';
 import {
@@ -31,7 +32,6 @@ import {
 import { toast } from '@repo/design-system/components/ui/sonner';
 import { Switch } from '@repo/design-system/components/ui/switch';
 import { useMediaQuery } from '@repo/design-system/hooks/use-media-query';
-import { Pencil } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
