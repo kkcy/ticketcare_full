@@ -40,7 +40,8 @@ export function EventSummary({ event }: EventSummaryProps) {
             <h3 className="font-semibold">Venue</h3>
           </div>
           <p className="mt-2 text-muted-foreground text-sm">
-            {event.venue.name}
+            {/* {event.venue.name} */}
+            {event.venueName}
           </p>
         </div>
         <div className="rounded-lg border p-4">

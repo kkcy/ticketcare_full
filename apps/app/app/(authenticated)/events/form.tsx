@@ -30,7 +30,6 @@ import { Textarea } from '@repo/design-system/components/ui/textarea';
 import { title } from 'radash';
 import { getPremiumTiers } from './[slug]/actions';
 import { createEvent, updateEvent } from './actions';
-import { VenueAutocomplete } from './components/VenueAutocomplete';
 
 interface EventFormProps {
   setOpen?: (open: boolean) => void;
@@ -79,7 +78,8 @@ export function EventForm({ setOpen, mode = 'create', event }: EventFormProps) {
           requiresApproval: event.requiresApproval,
           waitingListEnabled: event.waitingListEnabled,
           refundPolicy: event.refundPolicy || '',
-          venueId: Number(event.venueId),
+          // venueId: Number(event.venueId),
+          venueName: event.venueName || '',
           isPremiumEvent: event.isPremiumEvent || false,
           maxTicketsPerEvent: event.maxTicketsPerEvent || 20,
           premiumTierId: event.premiumTierId || null,
@@ -96,7 +96,8 @@ export function EventForm({ setOpen, mode = 'create', event }: EventFormProps) {
           requiresApproval: false,
           waitingListEnabled: false,
           refundPolicy: '',
-          venueId: undefined,
+          // venueId: undefined,
+          venueName: undefined,
           isPremiumEvent: false,
           maxTicketsPerEvent: 20,
           premiumTierId: null,
@@ -106,23 +107,25 @@ export function EventForm({ setOpen, mode = 'create', event }: EventFormProps) {
   async function onSubmit(values: PrismaNamespace.EventUncheckedCreateInput) {
     try {
       if (mode === 'edit' && event?.id) {
-        if (values.venueId === undefined) {
+        // if (values.venueId === undefined) {
+        if (values.venueName === undefined) {
           throw new Error('Venue is required');
         }
 
         await updateEvent(event.id, {
           ...values,
-          venueId: values.venueId,
+          // venueId: values.venueId,
         });
         toast.success('Event updated successfully');
       } else {
-        if (values.venueId === undefined) {
+        // if (values.venueId === undefined) {
+        if (values.venueName === undefined) {
           throw new Error('Venue is required');
         }
 
         await createEvent({
           ...values,
-          venueId: values.venueId,
+          // venueId: values.venueId,
         });
         toast.success('Event created successfully');
       }
@@ -130,7 +133,7 @@ export function EventForm({ setOpen, mode = 'create', event }: EventFormProps) {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Something went wrong';
-
+      console.error(errorMessage);
       toast.error(errorMessage);
     }
   }
@@ -178,12 +181,13 @@ export function EventForm({ setOpen, mode = 'create', event }: EventFormProps) {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <FormField
             control={form.control}
-            name="venueId"
+            name="venueName"
             render={({ field }) => (
               <FormItem className="flex flex-col">
                 <FormLabel>Venue</FormLabel>
                 <FormControl>
-                  <VenueAutocomplete {...field} value={String(field.value)} />
+                  {/* <VenueAutocomplete {...field} value={String(field.value)} /> */}
+                  <Input placeholder="Venue Name" type="" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -301,7 +305,7 @@ export function EventForm({ setOpen, mode = 'create', event }: EventFormProps) {
             )}
           /> */}
 
-          {form.getValues().isPremiumEvent ? (
+          {form.getValues().isPremiumEvent && (
             <FormField
               control={form.control}
               name="premiumTierId"
@@ -361,39 +365,41 @@ export function EventForm({ setOpen, mode = 'create', event }: EventFormProps) {
                 </FormItem>
               )}
             />
-          ) : (
-            <FormField
-              control={form.control}
-              name="maxTicketsPerEvent"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Maximum Tickets</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={1}
-                      max={1000}
-                      {...field}
-                      onChange={(e) =>
-                        field.onChange(Number.parseInt(e.target.value) || 20)
-                      }
-                      disabled={!form.getValues().isPremiumEvent}
-                      value={form.getValues().isPremiumEvent ? field.value : 20}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Maximum number of tickets that can be sold for this event.
-                    {!form.getValues().isPremiumEvent && (
-                      <span className="mt-1 block text-amber-600">
-                        Free tier limited to 20 tickets per event.
-                      </span>
-                    )}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           )}
+
+          {/* <FormField
+                control={form.control}
+                name="maxTicketsPerEvent"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Maximum Tickets</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={1000}
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(Number.parseInt(e.target.value) || 20)
+                        }
+                        disabled={!form.getValues().isPremiumEvent}
+                        value={
+                          form.getValues().isPremiumEvent ? field.value : 20
+                        }
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Maximum number of tickets that can be sold for this event.
+                      {!form.getValues().isPremiumEvent && (
+                        <span className="mt-1 block text-amber-600">
+                          Free tier limited to 20 tickets per event.
+                        </span>
+                      )}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              /> */}
         </div>
 
         <Button type="submit" className="max-md:w-full">

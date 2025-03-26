@@ -41,7 +41,8 @@ export async function getEvent(slug: string) {
           maxTicketsPerEvent: true,
         },
       },
-      venue: { select: { name: true } },
+      venueName: true,
+      // venue: { select: { name: true } },
       ticketTypes: {
         select: {
           id: true,

@@ -42,11 +42,12 @@ export const PastEvents = async () => {
       title: true,
       description: true,
       startTime: true,
-      venue: {
-        select: {
-          name: true,
-        },
-      },
+      venueName: true,
+      // venue: {
+      //   select: {
+      //     name: true,
+      //   },
+      // },
       isPremiumEvent: true,
       maxTicketsPerEvent: true,
     },
@@ -102,7 +103,8 @@ export const PastEvents = async () => {
               </p>
               <p className="flex items-center">
                 <MapPinIcon className="mr-2 h-4 w-4" />
-                {event.venue.name}
+                {event.venueName}
+                {/* {event.venue.name} */}
               </p>
             </CardContent>
             <CardFooter>
