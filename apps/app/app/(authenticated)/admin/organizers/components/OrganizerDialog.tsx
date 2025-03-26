@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 
-import type { SerializedOrganizer } from '../../../../../types';
+import { useIsDesktop } from '@/app/hooks/useIsDesktop';
 import { Button } from '@repo/design-system/components/ui/button';
 import {
   Dialog,
@@ -19,8 +19,8 @@ import {
   DrawerHeader,
   DrawerTrigger,
 } from '@repo/design-system/components/ui/drawer';
-import { useMediaQuery } from '@repo/design-system/hooks/use-media-query';
 import { title } from 'radash';
+import type { SerializedOrganizer } from '../../../../../types';
 import { OrganizerForm } from '../form';
 
 interface OrganizerDialogProps {
@@ -33,7 +33,7 @@ export function OrganizerDialog({
   organizer,
 }: OrganizerDialogProps) {
   const [open, setOpen] = React.useState(false);
-  const isDesktop = useMediaQuery('(min-width: 768px)');
+  const isDesktop = useIsDesktop();
 
   if (isDesktop) {
     return (

@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 
+import { useIsDesktop } from '@/app/hooks/useIsDesktop';
 import type { SerializedEvent } from '@/types';
 import { Button } from '@repo/design-system/components/ui/button';
 import {
@@ -19,7 +20,6 @@ import {
   DrawerHeader,
   DrawerTrigger,
 } from '@repo/design-system/components/ui/drawer';
-import { useMediaQuery } from '@repo/design-system/hooks/use-media-query';
 import { title } from 'radash';
 import { EventForm } from '../form';
 
@@ -30,7 +30,7 @@ interface EventDialogProps {
 
 export function EventDialog({ mode = 'create', event }: EventDialogProps) {
   const [open, setOpen] = React.useState(false);
-  const isDesktop = useMediaQuery('(min-width: 768px)');
+  const isDesktop = useIsDesktop();
 
   if (isDesktop) {
     return (

@@ -1,5 +1,6 @@
 'use client';
 
+import { useIsDesktop } from '@/app/hooks/useIsDesktop';
 import { env } from '@/env';
 import type { SerializedEvent } from '@/types';
 import { Pencil, Upload } from '@repo/design-system/components/icons';
@@ -29,7 +30,6 @@ import {
 } from '@repo/design-system/components/ui/form';
 import { Label } from '@repo/design-system/components/ui/label';
 import { toast } from '@repo/design-system/components/ui/sonner';
-import { useMediaQuery } from '@repo/design-system/hooks/use-media-query';
 import Image from 'next/image';
 import { useState } from 'react';
 import type { ChangeEvent } from 'react';
@@ -45,7 +45,7 @@ interface HeroImageDialogProps {
 
 export function HeroImageDialog({ event }: HeroImageDialogProps) {
   const [open, setOpen] = useState(false);
-  const isDesktop = useMediaQuery('(min-width: 768px)');
+  const isDesktop = useIsDesktop();
 
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -176,7 +176,9 @@ export function HeroImageDialog({ event }: HeroImageDialogProps) {
                 <div className="flex items-center gap-4">
                   <Label
                     htmlFor="image-upload"
-                    className={`flex h-10 cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-4 py-2 font-medium text-sm ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${isUploading ? 'opacity-50' : ''}`}
+                    className={`flex h-10 cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-4 py-2 font-medium text-sm ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                      isUploading ? 'opacity-50' : ''
+                    }`}
                   >
                     <Upload className="h-4 w-4" />
                     {isUploading

@@ -1,4 +1,5 @@
 'use client';
+import { useIsDesktop } from '@/app/hooks/useIsDesktop';
 import type { PrismaNamespace } from '@repo/database';
 import { Button } from '@repo/design-system/components/ui/button';
 import {
@@ -16,7 +17,6 @@ import {
   DrawerHeader,
   DrawerTrigger,
 } from '@repo/design-system/components/ui/drawer';
-import { useMediaQuery } from '@repo/design-system/hooks/use-media-query';
 import * as React from 'react';
 import { OrderForm } from '../form';
 
@@ -31,7 +31,7 @@ function title(mode: 'create' | 'edit') {
 
 export function OrderDialog({ mode = 'create', order }: OrderDialogProps) {
   const [open, setOpen] = React.useState(false);
-  const isDesktop = useMediaQuery('(min-width: 768px)');
+  const isDesktop = useIsDesktop();
 
   if (isDesktop) {
     return (

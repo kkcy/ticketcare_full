@@ -31,9 +31,9 @@ import {
 } from '@repo/design-system/components/ui/form';
 import { toast } from '@repo/design-system/components/ui/sonner';
 import { Switch } from '@repo/design-system/components/ui/switch';
-import { useMediaQuery } from '@repo/design-system/hooks/use-media-query';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useIsDesktop } from '@/app/hooks/useIsDesktop';
 
 interface OrganizerNotificationProps {
   organizer: PrismaNamespace.Organizer;
@@ -146,7 +146,7 @@ export function OrganizerNotification({
   organizer,
 }: OrganizerNotificationProps) {
   const [open, setOpen] = useState(false);
-  const isDesktop = useMediaQuery('(min-width: 768px)');
+  const isDesktop = useIsDesktop();
 
   return isDesktop ? (
     <Dialog open={open} onOpenChange={setOpen}>

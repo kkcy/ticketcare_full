@@ -1,5 +1,6 @@
 'use client';
 
+import { useIsDesktop } from '@/app/hooks/useIsDesktop';
 import { env } from '@/env';
 import { Pencil, Upload } from '@repo/design-system/components/icons';
 import { Button } from '@repo/design-system/components/ui/button';
@@ -28,7 +29,6 @@ import {
 } from '@repo/design-system/components/ui/form';
 import { Label } from '@repo/design-system/components/ui/label';
 import { toast } from '@repo/design-system/components/ui/sonner';
-import { useMediaQuery } from '@repo/design-system/hooks/use-media-query';
 import Image from 'next/image';
 import { useState } from 'react';
 import type { ChangeEvent, DragEvent } from 'react';
@@ -47,7 +47,7 @@ export function CarouselImagesDialog({
   onSubmit,
 }: CarouselImagesDialogProps) {
   const [open, setOpen] = useState(false);
-  const isDesktop = useMediaQuery('(min-width: 768px)');
+  const isDesktop = useIsDesktop();
 
   const [carouselImages, setCarouselImages] = useState<string[]>(images ?? []);
   const [uploadingFiles, setUploadingFiles] = useState<Map<string, number>>(
@@ -121,7 +121,9 @@ export function CarouselImagesDialog({
 
     // First assign IDs to all files
     for (const file of files) {
-      const fileId = `${file.name}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      const fileId = `${file.name}-${Date.now()}-${Math.random()
+        .toString(36)
+        .substring(2, 9)}`;
       fileIdsMap.set(file, fileId);
       newUploadingFiles.set(fileId, 0);
     }

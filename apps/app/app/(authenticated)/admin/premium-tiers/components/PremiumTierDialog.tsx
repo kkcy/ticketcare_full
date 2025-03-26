@@ -1,36 +1,39 @@
-'use client'
+'use client';
 
-import * as React from 'react'
+import * as React from 'react';
 
-import type { SerializedPremiumTier } from '@/types'
-import { Button } from '@repo/design-system/components/ui/button'
+import { useIsDesktop } from '@/app/hooks/useIsDesktop';
+import type { SerializedPremiumTier } from '@/types';
+import { Button } from '@repo/design-system/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger
-} from '@repo/design-system/components/ui/dialog'
+  DialogTrigger,
+} from '@repo/design-system/components/ui/dialog';
 import {
   Drawer,
   DrawerClose,
   DrawerContent,
   DrawerFooter,
   DrawerHeader,
-  DrawerTrigger
-} from '@repo/design-system/components/ui/drawer'
-import { useMediaQuery } from '@repo/design-system/hooks/use-media-query'
-import { title } from 'radash'
-import { PremiumTierForm } from '../form'
+  DrawerTrigger,
+} from '@repo/design-system/components/ui/drawer';
+import { title } from 'radash';
+import { PremiumTierForm } from '../form';
 
 interface PremiumTierDialogProps {
-  mode?: 'create' | 'edit'
-  premiumTier?: SerializedPremiumTier
+  mode?: 'create' | 'edit';
+  premiumTier?: SerializedPremiumTier;
 }
 
-export function PremiumTierDialog({ mode = 'create', premiumTier }: PremiumTierDialogProps) {
-  const [open, setOpen] = React.useState(false)
-  const isDesktop = useMediaQuery('(min-width: 768px)')
+export function PremiumTierDialog({
+  mode = 'create',
+  premiumTier,
+}: PremiumTierDialogProps) {
+  const [open, setOpen] = React.useState(false);
+  const isDesktop = useIsDesktop();
 
   if (isDesktop) {
     return (
@@ -45,7 +48,7 @@ export function PremiumTierDialog({ mode = 'create', premiumTier }: PremiumTierD
           <PremiumTierForm {...{ setOpen, mode, premiumTier }} />
         </DialogContent>
       </Dialog>
-    )
+    );
   }
 
   return (
@@ -65,5 +68,5 @@ export function PremiumTierDialog({ mode = 'create', premiumTier }: PremiumTierD
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
-  )
+  );
 }

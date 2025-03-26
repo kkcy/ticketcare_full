@@ -1,5 +1,6 @@
 'use client';
 
+import { useIsDesktop } from '@/app/hooks/useIsDesktop';
 import type { SerializedEvent, SerializedPremiumTier } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { StarIcon, TicketsIcon } from '@repo/design-system/components/icons';
@@ -43,7 +44,6 @@ import {
 } from '@repo/design-system/components/ui/select';
 import { Separator } from '@repo/design-system/components/ui/separator';
 import { toast } from '@repo/design-system/components/ui/sonner';
-import { useMediaQuery } from '@repo/design-system/hooks/use-media-query';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
 import * as z from 'zod';
@@ -64,7 +64,7 @@ export function EventUpgradeDialog({ event }: EventUpgradeDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [tiers, setTiers] = React.useState<SerializedPremiumTier[]>([]);
-  const isDesktop = useMediaQuery('(min-width: 768px)');
+  const isDesktop = useIsDesktop();
   const router = useRouter();
 
   // Initialize form with react-hook-form
