@@ -290,6 +290,7 @@ async function main() {
     data: {
       organizerId: musicOrganizer.id,
       venueId: arena.id,
+      venueName: arena.name,
       title: 'Summer Music Festival',
       slug: 'summer-music-festival-2024',
       description: 'A day of amazing music performances',
@@ -312,6 +313,7 @@ async function main() {
     data: {
       organizerId: sportsOrganizer.id,
       venueId: stadium.id,
+      venueName: stadium.name,
       title: 'Championship Finals',
       slug: 'championship-finals-2024',
       description: 'The ultimate showdown',
@@ -334,6 +336,7 @@ async function main() {
     data: {
       organizerId: musicOrganizer.id,
       venueId: arena.id,
+      venueName: arena.name,
       title: 'Pro Premium Concert Series',
       slug: 'pro-premium-concert-series-2024',
       description: 'Exclusive concert series with top artists',

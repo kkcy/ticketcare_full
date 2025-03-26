@@ -209,7 +209,8 @@ model Venue {
 model Event {
   id                 String      @id @default(uuid())
   organizerId        String      @map("organizer_id")
-  venueId            String      @map("venue_id")
+  venueId            String?     @map("venue_id")
+  venueName          String?     @map("venue_name")
   title              String
   slug               String      @unique
   description        String?
@@ -232,7 +233,7 @@ model Event {
   ticketsSold        Int          @default(0) @map("tickets_sold")
 
   organizer   Organizer    @relation(fields: [organizerId], references: [id], onDelete: Cascade)
-  venue       Venue        @relation(fields: [venueId], references: [id], onDelete: Restrict)
+  venue       Venue?       @relation(fields: [venueId], references: [id], onDelete: Restrict)
   approvedBy  User?        @relation("ApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
   tickets     Ticket[]
   ticketTypes TicketType[]
