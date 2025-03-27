@@ -3,6 +3,7 @@
 import * as React from 'react';
 
 import { useIsDesktop } from '@/app/hooks/useIsDesktop';
+import { useIsPastEvent } from '@/app/hooks/useIsPastEvent';
 import type { SerializedEvent } from '@/types';
 import { Button } from '@repo/design-system/components/ui/button';
 import {
@@ -29,14 +30,18 @@ interface EventDialogProps {
 }
 
 export function EventDialog({ mode = 'create', event }: EventDialogProps) {
-  const [open, setOpen] = React.useState(false);
   const isDesktop = useIsDesktop();
+  const isPast = useIsPastEvent(event?.startTime);
+
+  const [open, setOpen] = React.useState(false);
 
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button>{title(mode)} Event</Button>
+          <Button disabled={mode === 'edit' && isPast}>
+            {title(mode)} Event
+          </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>

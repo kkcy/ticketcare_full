@@ -1,5 +1,6 @@
 'use client';
 
+import { useIsPastEvent } from '@/app/hooks/useIsPastEvent';
 import type { SerializedEvent } from '@/types';
 import { Loader2 } from '@repo/design-system/components/icons';
 import {
@@ -27,6 +28,8 @@ interface EventStatusProps {
 }
 
 export function EventStatus({ event }: EventStatusProps) {
+  const isPast = useIsPastEvent(event.startTime);
+
   const [isOpen, setIsOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -57,9 +60,9 @@ export function EventStatus({ event }: EventStatusProps) {
   return (
     <>
       <Select
-        value={event.status}
+        value={isPast ? 'past' : event.status}
         onValueChange={handleStatusChange}
-        disabled={isLoading}
+        disabled={isLoading || isPast}
       >
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Select status" />
@@ -70,6 +73,7 @@ export function EventStatus({ event }: EventStatusProps) {
           <SelectItem value="published">Published</SelectItem>
           <SelectItem value="cancelled">Cancelled</SelectItem>
           <SelectItem value="sold_out">Sold Out</SelectItem>
+          {isPast && <SelectItem value="past">Past</SelectItem>}
         </SelectContent>
       </Select>
 

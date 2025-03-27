@@ -1,5 +1,6 @@
 'use client';
 
+import { useIsPastEvent } from '@/app/hooks/useIsPastEvent';
 import type { SerializedEvent } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@repo/design-system/components/ui/button';
@@ -47,6 +48,8 @@ interface TicketTypeDialogProps {
 }
 
 export function TicketTypeDialog({ event }: TicketTypeDialogProps) {
+  const isPast = useIsPastEvent(event.startTime);
+
   const [open, setOpen] = React.useState(false);
 
   const form = useForm<TicketTypeFormValues>({
@@ -84,7 +87,9 @@ export function TicketTypeDialog({ event }: TicketTypeDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">Create Ticket Type</Button>
+        <Button size="sm" disabled={isPast}>
+          Create Ticket Type
+        </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
