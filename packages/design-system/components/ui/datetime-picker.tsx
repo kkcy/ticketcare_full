@@ -153,9 +153,9 @@ export const DatetimePicker = forwardRef<HTMLDivElement, DateTimeInput>(
       [onChange]
     )
     const timescape = useTimescape({
-      date: value,
-      onChangeDate: handleDateChange,
       ...dtOptions,
+      ...(value && { date: value }),
+      onChangeDate: handleDateChange,
     })
     return (
       <DatetimeGrid
