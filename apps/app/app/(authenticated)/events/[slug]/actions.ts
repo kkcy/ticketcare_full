@@ -57,6 +57,20 @@ export async function getEvent(slug: string) {
           },
         },
       },
+      eventDates: {
+        select: {
+          id: true,
+          date: true,
+          timeSlots: {
+            select: {
+              id: true,
+              startTime: true,
+              endTime: true,
+              doorsOpen: true,
+            },
+          },
+        },
+      },
     },
   });
 

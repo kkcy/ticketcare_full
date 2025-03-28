@@ -12,6 +12,7 @@ import type { ReactElement } from 'react';
 import { Header } from '../../components/header';
 import { EventDialog } from '../components/EventDialog';
 import { getEvent } from './actions';
+import { EventDates } from './components/EventDates';
 import { EventReports } from './components/EventReports';
 import { EventStatus } from './components/EventStatus';
 import { EventSummary } from './components/EventSummary';
@@ -70,6 +71,7 @@ export default async function EventDetailPage({
             <TabsList>
               <TabsTrigger value="summary">Summary</TabsTrigger>
               <TabsTrigger value="reports">Reports</TabsTrigger>
+              <TabsTrigger value="dates">Time Slots</TabsTrigger>
               <TabsTrigger value="tickets">Tickets</TabsTrigger>
             </TabsList>
             <div className="flex items-center gap-2">
@@ -83,6 +85,9 @@ export default async function EventDetailPage({
           </TabsContent>
           <TabsContent value="reports" className="mt-6">
             <EventReports event={event} />
+          </TabsContent>
+          <TabsContent value="dates" className="mt-6">
+            <EventDates event={event} />
           </TabsContent>
           <TabsContent value="tickets" className="mt-6">
             <EventTickets event={event} />
