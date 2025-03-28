@@ -1,8 +1,7 @@
 'use client';
 
 import type { SerializedEvent, SerializedPremiumTier } from '@/types';
-import { useEffect, useState } from 'react';
-
+import { zodResolver } from '@hookform/resolvers/zod';
 import type { PrismaNamespace } from '@repo/database';
 import { Button } from '@repo/design-system/components/ui/button';
 import { DatetimePicker } from '@repo/design-system/components/ui/datetime-picker';
@@ -28,6 +27,8 @@ import {
 import { toast } from '@repo/design-system/components/ui/sonner';
 import { Textarea } from '@repo/design-system/components/ui/textarea';
 import { title } from 'radash';
+import { useEffect, useState } from 'react';
+import { z } from 'zod';
 import { getPremiumTiers } from './[slug]/actions';
 import { createEvent, updateEvent } from './actions';
 
@@ -39,9 +40,70 @@ interface EventFormProps {
 
 const eventCategories = ['music', 'sports', 'tech', 'art', 'film', 'food'];
 
+// Define the Zod schema for event form validation
+const eventFormSchema = z
+  .object({
+    title: z
+      .string()
+      .min(3, { message: 'Title must be at least 3 characters' }),
+    description: z.string(),
+    startTime: z.date({ required_error: 'Start time is required' }),
+    endTime: z.date({ required_error: 'End time is required' }),
+    doorsOpen: z.date().optional(),
+    category: z.array(z.string()).min(1, {
+      message: 'Please select at least one category',
+    }),
+    venueName: z.string().min(1, { message: 'Venue name is required' }),
+  })
+  .refine(
+    (data) => {
+      // Ensure end time is after start time
+      return data.endTime > data.startTime;
+    },
+    {
+      message: 'End time must be after start time',
+      path: ['endTime'],
+    }
+  );
+// .refine(
+//   (data) => {
+//     // If it's a premium event, premium tier ID is required
+//     if (data.isPremiumEvent) {
+//       return !!data.premiumTierId;
+//     }
+//     return true;
+//   },
+//   {
+//     message: 'Premium tier is required for premium events',
+//     path: ['premiumTierId'],
+//   }
+// );
+// Type for form values
+type EventFormValues = z.infer<typeof eventFormSchema>;
+
 export function EventForm({ setOpen, mode = 'create', event }: EventFormProps) {
   const [premiumTiers, setPremiumTiers] = useState<SerializedPremiumTier[]>([]);
   const [isLoadingTiers, setIsLoadingTiers] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Initialize form with default values or existing event data
+  const form = useForm<EventFormValues>({
+    resolver: zodResolver(eventFormSchema),
+    defaultValues:
+      mode === 'edit'
+        ? {
+            title: event?.title || '',
+            description: event?.description || '',
+            startTime: event?.startTime
+              ? new Date(event.startTime)
+              : new Date(),
+            endTime: event?.endTime ? new Date(event.endTime) : new Date(),
+            doorsOpen: event?.doorsOpen ? new Date(event.doorsOpen) : undefined,
+            category: event?.category || [],
+            venueName: event?.venueName || '',
+          }
+        : undefined,
+  });
 
   // Fetch premium tiers when the form loads
   useEffect(() => {
@@ -64,77 +126,37 @@ export function EventForm({ setOpen, mode = 'create', event }: EventFormProps) {
     fetchPremiumTiers();
   }, []);
 
-  const form = useForm<PrismaNamespace.EventUncheckedCreateInput>({
-    defaultValues: event
-      ? {
-          title: event.title,
-          description: event.description || '',
-          category: event.category,
-          startTime: event.startTime ? new Date(event.startTime) : undefined,
-          endTime: event.endTime ? new Date(event.endTime) : undefined,
-          doorsOpen: event.doorsOpen ? new Date(event.doorsOpen) : undefined,
-          status: event.status,
-          isPublic: event.isPublic,
-          requiresApproval: event.requiresApproval,
-          waitingListEnabled: event.waitingListEnabled,
-          refundPolicy: event.refundPolicy || '',
-          // venueId: Number(event.venueId),
-          venueName: event.venueName || '',
-          isPremiumEvent: event.isPremiumEvent || false,
-          maxTicketsPerEvent: event.maxTicketsPerEvent || 20,
-          premiumTierId: event.premiumTierId || null,
-        }
-      : {
-          title: '',
-          description: '',
-          category: [],
-          startTime: new Date(),
-          endTime: new Date(),
-          doorsOpen: new Date(),
-          status: 'draft',
-          isPublic: true,
-          requiresApproval: false,
-          waitingListEnabled: false,
-          refundPolicy: '',
-          // venueId: undefined,
-          venueName: undefined,
-          isPremiumEvent: false,
-          maxTicketsPerEvent: 20,
-          premiumTierId: null,
-        },
-  });
-
-  async function onSubmit(values: PrismaNamespace.EventUncheckedCreateInput) {
+  // Handle form submission
+  async function onSubmit(values: EventFormValues) {
+    setIsSubmitting(true);
     try {
-      if (mode === 'edit' && event?.id) {
-        // if (values.venueId === undefined) {
-        if (values.venueName === undefined) {
-          throw new Error('Venue is required');
-        }
+      const prismaValues = values as PrismaNamespace.EventUncheckedCreateInput;
 
-        await updateEvent(event.id, {
-          ...values,
-          // venueId: values.venueId,
-        });
-        toast.success('Event updated successfully');
-      } else {
-        // if (values.venueId === undefined) {
-        if (values.venueName === undefined) {
-          throw new Error('Venue is required');
-        }
+      // NOTE: hardcoded doors open for now
+      prismaValues.doorsOpen = values.startTime;
 
-        await createEvent({
-          ...values,
-          // venueId: values.venueId,
-        });
+      if (mode === 'create') {
+        await createEvent(prismaValues);
         toast.success('Event created successfully');
+      } else {
+        if (!event) {
+          throw new Error('No event to update');
+        }
+        await updateEvent(event.id, prismaValues);
+        toast.success('Event updated successfully');
       }
-      setOpen?.(false);
+
+      // Close the dialog if setOpen is provided
+      if (setOpen) {
+        setOpen(false);
+      }
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Something went wrong';
-      console.error(errorMessage);
-      toast.error(errorMessage);
+        error instanceof Error ? error.message : 'An error occurred';
+      console.error('Failed to save event:', error);
+      toast.error(`Failed to save event: ${errorMessage}`);
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -305,7 +327,7 @@ export function EventForm({ setOpen, mode = 'create', event }: EventFormProps) {
             )}
           /> */}
 
-          {form.getValues().isPremiumEvent && (
+          {/* {form.getValues().isPremiumEvent && (
             <FormField
               control={form.control}
               name="premiumTierId"
@@ -365,7 +387,7 @@ export function EventForm({ setOpen, mode = 'create', event }: EventFormProps) {
                 </FormItem>
               )}
             />
-          )}
+          )} */}
 
           {/* <FormField
                 control={form.control}
@@ -402,8 +424,8 @@ export function EventForm({ setOpen, mode = 'create', event }: EventFormProps) {
               /> */}
         </div>
 
-        <Button type="submit" className="max-md:w-full">
-          Submit
+        <Button type="submit" className="max-md:w-full" disabled={isSubmitting}>
+          {isSubmitting ? 'Submitting...' : 'Submit'}
         </Button>
       </form>
     </Form>
