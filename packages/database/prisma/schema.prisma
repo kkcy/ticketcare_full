@@ -217,11 +217,11 @@ model Event {
   category           String[]    @map("categories")
   startTime          DateTime    @map("start_time")
   endTime            DateTime    @map("end_time")
-  doorsOpen          DateTime    @map("doors_open")
-  status             EventStatus
-  isPublic           Boolean     @map("is_public")
-  requiresApproval   Boolean     @map("requires_approval")
-  waitingListEnabled Boolean     @map("waiting_list_enabled")
+  doorsOpen          DateTime?   @map("doors_open")
+  status             EventStatus @default(draft)
+  isPublic           Boolean     @default(true) @map("is_public")
+  requiresApproval   Boolean     @default(false) @map("requires_approval")
+  waitingListEnabled Boolean     @default(false) @map("waiting_list_enabled")
   refundPolicy       String?     @map("refund_policy")
   approvedById       String?     @map("approved_by_id")
 
