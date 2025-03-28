@@ -15,12 +15,12 @@ type TimeFormat = 'hours' | 'minutes' | 'seconds' | 'am/pm'
 
 type DateTimeArray<T extends DateFormat | TimeFormat> = T[]
 type DateTimeFormatDefaults = [
-  DateTimeArray<DateFormat>,
+  DateTimeArray<DateFormat> | undefined,
   DateTimeArray<TimeFormat>,
 ]
 
 const DEFAULTS = [
-  ['months', 'days', 'years'],
+  ['days', 'months', 'years'],
   ['hours', 'minutes', 'am/pm'],
 ] as DateTimeFormatDefaults
 
@@ -99,7 +99,7 @@ const DatetimeGrid = forwardRef<
                       </React.Fragment>
                     ))
                   : null}
-                {format[1]?.length && !i ? (
+                {format[0]?.length && format[1]?.length && !i ? (
                   // date-time separator - only if both date and time are present
                   <span
                     className={cn(
