@@ -159,14 +159,36 @@ export async function createTicketType(
     minPerOrder: number;
     saleStartTime: Date;
     saleEndTime: Date;
+    timeSlotIds: string[];
   }
 ) {
   try {
-    const ticketType = await database.ticketType.create({
-      data: {
-        eventId: eventId,
-        ...ticketTypeData,
-      },
+    // Use a transaction to ensure both operations succeed or fail together
+    const result = await database.$transaction(async (tx) => {
+      // Create ticket type
+      const ticketType = await tx.ticketType.create({
+        data: {
+          eventId: eventId,
+          name: ticketTypeData.name,
+          description: ticketTypeData.description,
+          price: ticketTypeData.price,
+          maxPerOrder: ticketTypeData.maxPerOrder,
+          minPerOrder: ticketTypeData.minPerOrder,
+          saleStartTime: ticketTypeData.saleStartTime,
+          saleEndTime: ticketTypeData.saleEndTime,
+        },
+      });
+
+      // Create inventories using time slot ids
+      await tx.inventory.createMany({
+        data: ticketTypeData.timeSlotIds.map((timeSlotId) => ({
+          ticketTypeId: ticketType.id,
+          quantity: ticketTypeData.quantity,
+          timeSlotId: timeSlotId,
+        })),
+      });
+
+      return ticketType;
     });
 
     // Optionally revalidate paths or perform additional actions
@@ -174,10 +196,10 @@ export async function createTicketType(
 
     return {
       success: true,
-      ticketType: serializePrisma(ticketType),
+      ticketType: serializePrisma(result),
     };
   } catch (error) {
-    log.error('Failed to create ticket type:', { error });
+    log.error('Failed to create ticket type or inventory:', { error });
 
     throw new Error(
       `Could not create ticket type: ${error instanceof Error ? error.message : String(error)}`

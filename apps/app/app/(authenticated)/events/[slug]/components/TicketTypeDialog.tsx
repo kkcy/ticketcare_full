@@ -29,6 +29,7 @@ import { toast } from '@repo/design-system/components/ui/sonner';
 import React from 'react';
 import { z } from 'zod';
 import { createTicketType } from '../actions';
+import { TimeSlotMultiSelect } from './time-slot/components/TimeSlotMultiSelect';
 
 const ticketTypeFormSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -39,8 +40,10 @@ const ticketTypeFormSchema = z.object({
   minPerOrder: z.string().min(1, 'Minimum per order is required'),
   saleStartTime: z.date(),
   saleEndTime: z.date(),
+  timeSlotIds: z.array(z.string()).min(1, {
+    message: 'Please select at least one timeslot',
+  }),
 });
-
 type TicketTypeFormValues = z.infer<typeof ticketTypeFormSchema>;
 
 interface TicketTypeDialogProps {
@@ -61,8 +64,9 @@ export function TicketTypeDialog({ event }: TicketTypeDialogProps) {
       quantity: '1',
       maxPerOrder: '1',
       minPerOrder: '1',
-      saleStartTime: new Date(),
-      saleEndTime: new Date(),
+      saleStartTime: new Date(event.startTime),
+      saleEndTime: new Date(event.endTime),
+      timeSlotIds: [],
     },
   });
 
@@ -91,7 +95,7 @@ export function TicketTypeDialog({ event }: TicketTypeDialogProps) {
           Create Ticket Type
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Create Ticket Type</DialogTitle>
           <DialogDescription>
@@ -101,13 +105,16 @@ export function TicketTypeDialog({ event }: TicketTypeDialogProps) {
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="mx-auto w-full max-w-3xl space-y-4 px-4 md:px-0"
+          >
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-2">
                     <FormLabel>Name</FormLabel>
                     <FormControl>
                       <Input placeholder="VIP Access" {...field} />
@@ -150,7 +157,26 @@ export function TicketTypeDialog({ event }: TicketTypeDialogProps) {
                 )}
               />
 
-              <div className="grid grid-cols-2 gap-2">
+              <FormField
+                control={form.control}
+                name="timeSlotIds"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Time Slot</FormLabel>
+                    <FormControl>
+                      <TimeSlotMultiSelect
+                        values={field.value}
+                        eventId={event.id}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormDescription>Time Slot of the ticket</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4 self-start">
                 <FormField
                   control={form.control}
                   name="minPerOrder"
@@ -179,29 +205,27 @@ export function TicketTypeDialog({ event }: TicketTypeDialogProps) {
                   )}
                 />
               </div>
-            </div>
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Special access with exclusive perks"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Optional description of what this ticket type includes
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Special access with exclusive perks"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Optional description of what this ticket type includes
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="saleStartTime"

@@ -46,7 +46,7 @@ function TicketTypeView({
       <p className="text-muted-foreground">{ticketType.description}</p>
       <p className="text-muted-foreground">Price: ${ticketType.price}</p>
       <p className="text-muted-foreground">
-        Tickets Purchased: {ticketType._count.tickets}
+        Tickets Sold: {ticketType._count.tickets}
       </p>
       <p className="text-muted-foreground">
         Tickets Remaining: {quantity - ticketType._count.tickets}

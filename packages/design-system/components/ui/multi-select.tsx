@@ -216,8 +216,11 @@ const MultiSelector = ({
 
 const MultiSelectorTrigger = forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, children, ...props }, ref) => {
+  React.HTMLAttributes<HTMLDivElement> & {
+    labelsRecord?: Record<string, string> // use to display selected label instead of value
+  }
+>(({ className, children, labelsRecord, ...props }, ref) => {
+  const displayLabel = labelsRecord != null;
   const { value, onValueChange, activeIndex } = useMultiSelect()
 
   const mousePreventDefault = useCallback((e: React.MouseEvent) => {
@@ -244,7 +247,7 @@ const MultiSelectorTrigger = forwardRef<
           )}
           variant="outline"
         >
-          <span className="text-xs">{title(item)}</span>
+          <span className="text-xs">{displayLabel ? labelsRecord?.[item] : title(item)}</span>
           <button
             aria-label={`Remove ${item} option`}
             aria-roledescription="button to remove option"
