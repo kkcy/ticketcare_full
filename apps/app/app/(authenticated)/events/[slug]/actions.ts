@@ -49,7 +49,29 @@ export async function getEvent(slug: string) {
           name: true,
           description: true,
           price: true,
-          inventory: true,
+          inventory: {
+            select: {
+              id: true,
+              quantity: true,
+              timeSlot: {
+                select: {
+                  id: true,
+                  startTime: true,
+                  endTime: true,
+                  doorsOpen: true,
+                  _count: {
+                    select: {
+                      tickets: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          maxPerOrder: true,
+          minPerOrder: true,
+          saleStartTime: true,
+          saleEndTime: true,
           _count: {
             select: {
               tickets: true,
@@ -203,6 +225,66 @@ export async function createTicketType(
 
     throw new Error(
       `Could not create ticket type: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+}
+
+// Update an existing ticket type without modifying inventory
+export async function updateTicketType(
+  ticketTypeId: string,
+  eventId: string,
+  slug: string,
+  ticketTypeData: {
+    name: string;
+    description?: string;
+    price: number;
+    maxPerOrder: number;
+    minPerOrder: number;
+    saleStartTime: Date;
+    saleEndTime: Date;
+  }
+) {
+  try {
+    // Validate that the ticket type belongs to the event
+    const existingTicketType = await database.ticketType.findFirst({
+      where: {
+        id: ticketTypeId,
+        eventId: eventId,
+      },
+    });
+
+    if (!existingTicketType) {
+      throw new Error('Ticket type not found or does not belong to this event');
+    }
+
+    // Update the ticket type
+    const updatedTicketType = await database.ticketType.update({
+      where: {
+        id: ticketTypeId,
+      },
+      data: {
+        name: ticketTypeData.name,
+        description: ticketTypeData.description,
+        price: ticketTypeData.price,
+        maxPerOrder: ticketTypeData.maxPerOrder,
+        minPerOrder: ticketTypeData.minPerOrder,
+        saleStartTime: ticketTypeData.saleStartTime,
+        saleEndTime: ticketTypeData.saleEndTime,
+      },
+    });
+
+    // Revalidate the path to reflect changes
+    revalidatePath(`/events/${slug}`);
+
+    return {
+      success: true,
+      ticketType: serializePrisma(updatedTicketType),
+    };
+  } catch (error) {
+    log.error('Failed to update ticket type:', { error });
+
+    throw new Error(
+      `Could not update ticket type: ${error instanceof Error ? error.message : String(error)}`
     );
   }
 }
