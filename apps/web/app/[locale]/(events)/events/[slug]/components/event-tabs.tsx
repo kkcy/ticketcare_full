@@ -1,7 +1,13 @@
 'use client';
 
+import { isExpired } from '@/app/[locale]/(events)/lib/utils';
 import type { SerializedEvent } from '@/app/types';
 import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from '@repo/design-system/components/ui/alert';
 import { FormProvider, useForm } from '@repo/design-system/components/ui/form';
 import {
   Tabs,
@@ -9,6 +15,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@repo/design-system/components/ui/tabs';
+import { CalendarOffIcon } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createCart } from '../actions';
 import { EventAbout } from './event-about';
@@ -57,6 +64,15 @@ export function EventTabs({ event }: EventTabsProps) {
 
   return (
     <FormProvider {...form}>
+      {isExpired(event) && (
+        <Alert variant="destructive">
+          <CalendarOffIcon className="h-4 w-4" />
+          <AlertTitle>This event has expired.</AlertTitle>
+          <AlertDescription>
+            You can no longer purchase tickets for this event.
+          </AlertDescription>
+        </Alert>
+      )}
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <Tabs
           value={currentTab}
