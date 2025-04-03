@@ -71,7 +71,7 @@ export const PaymentDetails: FC = () => {
             name="cardNumber"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-gray-500 text-sm">
+                <FormLabel className="text-muted-foreground text-sm">
                   Card Number
                 </FormLabel>
                 <FormControl>
@@ -93,7 +93,7 @@ export const PaymentDetails: FC = () => {
               name="expiryDate"
               render={({ field }) => (
                 <FormItem className="flex-1">
-                  <FormLabel className="text-gray-500 text-sm">
+                  <FormLabel className="text-muted-foreground text-sm">
                     Expiry Date
                   </FormLabel>
                   <FormControl>
@@ -114,7 +114,9 @@ export const PaymentDetails: FC = () => {
               name="cvv"
               render={({ field }) => (
                 <FormItem className="flex-1">
-                  <FormLabel className="text-gray-500 text-sm">CVV</FormLabel>
+                  <FormLabel className="text-muted-foreground text-sm">
+                    CVV
+                  </FormLabel>
                   <FormControl>
                     <CardInput
                       type="cvv"

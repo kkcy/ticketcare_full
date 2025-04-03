@@ -18,7 +18,7 @@ export function EventAbout({ event }: EventAboutProps) {
       <h2 className="font-semibold">About Event</h2>
 
       {/* TODO: replace with markdown */}
-      <p className="text-gray-600">{event.description}</p>
+      <p className="text-muted-foreground">{event.description}</p>
 
       <Separator />
 
@@ -36,7 +36,7 @@ export function EventAbout({ event }: EventAboutProps) {
             <Link href={`/organizers/${event.organizer?.slug}`}>
               <p className="font-medium">{event.organizer?.name}</p>
             </Link>
-            <p className="text-gray-500 text-sm">Organizer</p>
+            <p className="text-muted-foreground text-sm">Organizer</p>
           </div>
         </div>
         <Button>Follow</Button>

@@ -2,10 +2,14 @@
 
 import type { SerializedEvent } from '@/app/types';
 import { Button } from '@repo/design-system/components/ui/button';
-import { getMobileOperatingSystem } from '@repo/design-system/lib/utils';
-import { Calendar, X } from 'lucide-react';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@repo/design-system/components/ui/popover';
+import { Calendar } from 'lucide-react';
 import type React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import {} from 'react';
 
 interface AddToCalendarButtonProps {
   event: SerializedEvent;
@@ -18,22 +22,22 @@ export function AddToCalendarButton({
   timeSlot,
   children,
 }: AddToCalendarButtonProps) {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
+  // const [isOpen, setIsOpen] = useState<boolean>(false);
+  // const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
+  // useEffect(() => {
+  //   const handleClickOutside = (event: MouseEvent) => {
+  //     if (
+  //       dropdownRef.current &&
+  //       !dropdownRef.current.contains(event.target as Node)
+  //     ) {
+  //       setIsOpen(false);
+  //     }
+  //   };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  //   document.addEventListener('mousedown', handleClickOutside);
+  //   return () => document.removeEventListener('mousedown', handleClickOutside);
+  // }, []);
 
   const formatDate = (date: string): string => {
     return new Date(date).toISOString().replace(/-|:|\.\d+/g, '');
@@ -99,70 +103,43 @@ export function AddToCalendarButton({
     return URL.createObjectURL(blob);
   };
 
-  const handleCalendarClick = (): void => {
-    const os = getMobileOperatingSystem();
-
-    if (os === 'iOS') {
-      // For iOS, create and trigger download of .ics file
-      const url = getICalUrl();
-      window.location.href = url;
-    } else if (os === 'Android') {
-      // For Android, open Google Calendar
-      window.open(getGoogleCalendarUrl(), '_blank');
-    } else {
-      // For desktop, show dropdown with options
-      setIsOpen(!isOpen);
-    }
-  };
-
   return (
-    <div className="relative inline-block md:w-full" ref={dropdownRef}>
-      <Button
-        variant="outline"
-        onClick={handleCalendarClick}
-        title="Add to calendar"
-        className="md:w-full"
-      >
-        {children}
-        <Calendar className="h-4 w-4" />
-      </Button>
-
-      {isOpen && getMobileOperatingSystem() === 'desktop' && (
-        <div className="absolute z-10 mt-2 w-56 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
-          <div className="p-1">
-            <div className="flex items-center justify-between px-3 py-2">
-              <span className="font-medium text-gray-700 text-sm">
+    <div className="relative inline-block w-full">
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="outline" title="Add to calendar" className="w-full">
+            {children}
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-50" align="end">
+          <div className="space-y-2">
+            <div>
+              <span className="font-medium text-secondary-foreground text-sm">
                 Add to Calendar
               </span>
-              <Button
-                onClick={() => setIsOpen(false)}
-                className="text-gray-400 hover:text-gray-500"
-              >
-                <X className="h-4 w-4" />
-              </Button>
             </div>
-            <div className="py-1">
+            <Button variant="outline" asChild className="w-full">
               <a
                 href={getGoogleCalendarUrl()}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block px-4 py-2 text-gray-700 text-sm hover:bg-gray-100 hover:text-gray-900"
-                onClick={() => setIsOpen(false)}
               >
                 Google Calendar
               </a>
-              <a
-                href={getICalUrl()}
-                download="event.ics"
-                className="block px-4 py-2 text-gray-700 text-sm hover:bg-gray-100 hover:text-gray-900"
-                onClick={() => setIsOpen(false)}
-              >
+            </Button>
+            <Button variant="outline" asChild className="w-full">
+              <a href={getICalUrl()} download="event.ics">
                 iCal / Outlook
               </a>
-            </div>
+            </Button>
           </div>
-        </div>
-      )}
+        </PopoverContent>
+      </Popover>
+
+      {/* {isOpen && getMobileOperatingSystem() === 'desktop' && (
+        <div className="absolute top-0 z-10 mt-2 w-56 rounded-md bg-background shadow-lg"></div>
+      )} */}
     </div>
   );
 

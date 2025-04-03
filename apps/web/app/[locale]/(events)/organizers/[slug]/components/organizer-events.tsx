@@ -2,6 +2,11 @@
 
 import type { SerializedOrganizer } from '@/app/types';
 import { Badge } from '@repo/design-system/components/ui/badge';
+import {
+  Card,
+  CardFooter,
+  CardHeader,
+} from '@repo/design-system/components/ui/card';
 import { formatDate } from '@repo/design-system/lib/format';
 import { cn } from '@repo/design-system/lib/utils';
 import Link from 'next/link';
@@ -32,22 +37,23 @@ function EventCard({
 }) {
   return (
     <Link href={`/events/${event.slug}`}>
-      <div className="group/card w-full">
-        <div
-          className={cn(
-            'card backgroundImage relative mx-auto flex h-96 cursor-pointer flex-col justify-between overflow-hidden rounded-lg p-4 shadow-xl',
-            'bg-[url(/event-placeholder-1.png)] bg-cover'
-          )}
-        >
-          <div className="absolute top-0 left-0 h-full w-full opacity-60 transition duration-300 group-hover/card:bg-black" />
-          <div className="z-10 flex flex-row items-center space-x-4">
+      <Card
+        className={cn(
+          'relative h-96 w-full overflow-hidden',
+          'bg-[url(/event-placeholder-1.png)] bg-center bg-cover', // TODO: replace with event image
+          'z-10 flex flex-col justify-between'
+        )}
+      >
+        <CardHeader>
+          <div className="flex flex-row items-center space-x-4">
             <div className="flex flex-col gap-1">
-              <p className="relative z-10 font-normal text-base text-gray-50">
-                <Badge>{formatDate(new Date(event.startTime))}</Badge>
-              </p>
+              <Badge>{formatDate(new Date(event.startTime))}</Badge>
             </div>
           </div>
-          <div className="text content mb-2 space-y-2">
+        </CardHeader>
+
+        <CardFooter className="space-y-2">
+          <div className="w-full space-y-2">
             <div className="flex gap-1">
               {event.category.map((category) => (
                 <Badge key={category} variant="secondary">
@@ -55,17 +61,13 @@ function EventCard({
                 </Badge>
               ))}
             </div>
-            <div>
-              <h1 className="relative z-10 font-bold text-gray-50 text-md md:text-2xl">
-                {event.title}
-              </h1>
-              <p className="relative z-10 font-normal text-gray-50 text-sm">
-                {event.venue.name}
-              </p>
+            <div className="flex flex-col">
+              <h1 className="font-bold text-md md:text-xl">{event.title}</h1>
+              <p className="text-sm">{event.venue.name}</p>
             </div>
           </div>
-        </div>
-      </div>
+        </CardFooter>
+      </Card>
     </Link>
   );
 }

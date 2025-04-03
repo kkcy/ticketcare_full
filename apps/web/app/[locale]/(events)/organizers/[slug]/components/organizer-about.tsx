@@ -15,7 +15,7 @@ export function OrganizerAbout({ organizer }: OrganizerAboutProps) {
       <h2 className="font-semibold">About {organizer.name}</h2>
 
       {/* TODO: replace with markdown */}
-      <p className="text-gray-600">{organizer.description}</p>
+      <p className="text-secondary-foreground">{organizer.description}</p>
 
       <Separator />
 

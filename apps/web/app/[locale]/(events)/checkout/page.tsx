@@ -27,11 +27,11 @@ export default async function CheckoutPage({
 
   if (!cart) {
     return (
-      <div className="flex min-h-[500px] w-full flex-col items-center justify-start gap-8 bg-white p-4">
+      <div className="flex min-h-[500px] w-full flex-col items-center justify-start gap-8 bg-background p-4">
         <div className="w-full max-w-md space-y-8">
           <Skeleton className="h-8 w-48" />
 
-          <div className="flex items-start space-x-4 rounded-lg bg-gray-50 p-4">
+          <div className="flex items-start space-x-4 rounded-lg bg-muted p-4">
             <Skeleton className="h-24 w-24 flex-shrink-0 rounded-lg" />
             <div className="flex-1 space-y-4">
               <Skeleton className="h-6 w-3/4" />

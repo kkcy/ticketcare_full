@@ -76,11 +76,11 @@ export const OrderSummary: FC<OrderSummaryProps> = ({ cart }) => {
             <span>{formatCurrency(item.ticketType.price * item.quantity)}</span>
           </div>
         ))}
-        <div className="flex justify-between text-gray-500">
+        <div className="flex justify-between text-muted-foreground">
           <span>Subtotal</span>
           <span>{formatCurrency(subtotal)}</span>
         </div>
-        <div className="flex justify-between text-gray-500">
+        <div className="flex justify-between text-muted-foreground">
           <span className="flex items-center gap-1">
             Booking Fee
             <Info size={14} />

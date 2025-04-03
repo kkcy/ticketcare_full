@@ -39,7 +39,7 @@ export function EventDetails({ event }: EventDetailsProps) {
                     {event.eventDates.map((date) => (
                       <div key={date.id} className="flex items-start">
                         <div className="w-32 shrink-0 pt-2">
-                          <span className="font-medium text-gray-600 text-sm">
+                          <span className="font-medium text-muted-foreground text-sm">
                             {format(new Date(date.date), 'EEE, MMM d')}
                           </span>
                         </div>
@@ -50,7 +50,7 @@ export function EventDetails({ event }: EventDetailsProps) {
                               event={event}
                               timeSlot={slot}
                             >
-                              <span className="text-gray-700 text-sm">
+                              <span className="text-muted-foreground text-sm">
                                 {format(new Date(slot.startTime), 'h:mm a')}
                               </span>
                             </AddToCalendarButton>
@@ -72,7 +72,9 @@ export function EventDetails({ event }: EventDetailsProps) {
           <div className="flex flex-1 flex-col space-y-4">
             <div className="space-y-2">
               <p className="text-md">{event.venue?.name}</p>
-              <p className="text-gray-700 text-sm">{event.venue?.address}</p>
+              <p className="text-secondary-foreground text-sm">
+                {event.venue?.address}
+              </p>
             </div>
 
             <MapButton venue={event.venue} />

@@ -9,7 +9,8 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from '@repo/design-system/components/ui/toggle-group';
-import { Minus, Plus, Ticket } from 'lucide-react';
+import { cn } from '@repo/design-system/lib/utils';
+import { Minus, Plus } from 'lucide-react';
 import { AlertCircle } from 'lucide-react';
 import type { TicketFormValues } from './event-pricing';
 
@@ -49,7 +50,7 @@ export function DateStep({ control, event }: DateStepProps) {
                     day: 'numeric',
                     month: 'long',
                   })}
-                  className="flex aspect-square h-full flex-col gap-1 p-4 data-[state=on]:bg-red-500 data-[state=on]:text-white"
+                  className="flex aspect-square h-full flex-col gap-1 border p-4 data-[state=on]:border-red-500 data-[state=on]:bg-background"
                 >
                   <span className="text-sm">
                     {date.toLocaleDateString('en-US', { weekday: 'long' })}
@@ -131,7 +132,7 @@ export function TimeStep({ control, event }: TimeStepProps) {
                   hour: 'numeric',
                   minute: '2-digit',
                 })}
-                className="flex aspect-square h-full flex-col gap-1 p-4 data-[state=on]:bg-red-500 data-[state=on]:text-white"
+                className="flex aspect-square h-full flex-col gap-1 border p-4 data-[state=on]:border-red-500 data-[state=on]:bg-background"
               >
                 <span className="font-bold text-xl">
                   {startTime.toLocaleTimeString('en-US', {
@@ -222,46 +223,47 @@ export function TicketTypeStep({
             key={id}
             type="button"
             onClick={() => ticketField.onChange(id)}
-            className={`border ${
-              ticketField.value === id ? 'border-red-500' : 'border-gray-200'
-            } flex min-h-[280px] cursor-pointer flex-col rounded-2xl p-6`}
+            className={cn(
+              'flex min-h-[280px] cursor-pointer flex-col rounded-2xl border p-6',
+              { 'border-red-500': ticketField.value === id }
+            )}
           >
-            <div className="mb-4 w-fit rounded-md bg-muted p-3">
-              <Ticket size={20} />
-            </div>
-
-            <div className="flex-grow">
-              <h3 className="font-medium text-xl">{ticket.name}</h3>
-              <p className="min-h-[100px] text-gray-600 text-sm">
+            <div className="flex-grow space-y-2 ">
+              <h3 className="font-medium text-secondary-foreground text-xl leading-tight">
+                {ticket.name}
+              </h3>
+              <p className="min-h-[100px] text-muted-foreground text-sm leading-tight">
                 {ticket.description}
               </p>
             </div>
 
             <div className="mt-auto">
-              <div className="relative border-red-500 border-t border-dashed">
+              <div
+                className={cn('relative border-t border-dashed', {
+                  'border-red-500': ticketField.value === id,
+                })}
+              >
                 <div
-                  className={`-left-6 -ml-[1px] -mt-[10px] absolute h-6 w-3 rounded-tr-full rounded-br-full border-t border-r border-b bg-background ${
-                    ticketField.value === id
-                      ? 'border-red-500'
-                      : 'border-gray-200'
-                  }`}
+                  className={cn(
+                    '-left-6 -ml-[1px] -mt-[10px] absolute h-6 w-3 rounded-tr-full rounded-br-full border-t border-r border-b bg-background',
+                    { 'border-red-500': ticketField.value === id }
+                  )}
                 />
                 <div
-                  className={`-right-6 -mr-[1px] -mt-[10px] absolute h-6 w-3 rounded-tl-full rounded-bl-full border-t border-b border-l bg-background ${
-                    ticketField.value === id
-                      ? 'border-red-500'
-                      : 'border-gray-200'
-                  }`}
+                  className={cn(
+                    '-right-6 -mr-[1px] -mt-[10px] absolute h-6 w-3 rounded-tl-full rounded-bl-full border-t border-b border-l bg-background',
+                    { 'border-red-500': ticketField.value === id }
+                  )}
                 />
               </div>
               <div className="pt-4">
-                <p className="font-bold text-gray-900 text-xl">
+                <p className="font-bold text-secondary-foreground text-xl">
                   RM {Number(ticket.price).toFixed(2)}
-                  <span className="ml-1 font-normal text-gray-500 text-sm">
+                  <span className="ml-1 font-normal text-muted-foreground text-sm">
                     /pax
                   </span>
                 </p>
-                <p className="text-gray-500 text-sm">
+                <p className="text-muted-foreground text-sm">
                   {ticket.availableQuantity} tickets available
                 </p>
               </div>
@@ -323,7 +325,8 @@ export function QuantityStep({ control }: QuantityStepProps) {
             type="button"
             size="icon"
             onClick={() => quantityField.onChange(quantityField.value + 1)}
-            className="rounded-full bg-red-500 text-white"
+            className="rounded-full"
+            variant="outline"
           >
             <Plus />
           </Button>

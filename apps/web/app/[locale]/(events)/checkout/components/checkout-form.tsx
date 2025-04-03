@@ -92,7 +92,7 @@ export function CheckoutForm({ cart }: CheckoutFormProps) {
   return (
     <Form {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)} className="w-full">
-        <div className="mt-[106px] mb-16 space-y-8 p-4">
+        <div className="mt-12 mb-16 space-y-8 p-4">
           <OrderSummary cart={cart} />
           <Separator />
 
