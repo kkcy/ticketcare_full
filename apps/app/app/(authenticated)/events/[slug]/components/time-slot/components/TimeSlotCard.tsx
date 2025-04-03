@@ -1,9 +1,9 @@
 'use client';
 
+import { formatTime } from '@/app/util';
 import { ClockIcon, TrashIcon } from '@repo/design-system/components/icons';
 import { Button } from '@repo/design-system/components/ui/button';
 import { toast } from '@repo/design-system/components/ui/sonner';
-import { format } from 'date-fns';
 import { useState } from 'react';
 import { removeTimeSlot } from '../action';
 
@@ -58,12 +58,11 @@ export function TimeSlotCard({ timeSlot, onRemove }: TimeSlotCardProps) {
           <ClockIcon className="h-4 w-4 text-muted-foreground" />
           <div>
             <p className="font-medium text-sm">
-              {format(new Date(timeSlot.startTime), 'h:mm a')} -{' '}
-              {format(new Date(timeSlot.endTime), 'h:mm a')}
+              {formatTime(timeSlot.startTime)} - {formatTime(timeSlot.endTime)}
             </p>
             {timeSlot.doorsOpen && (
               <p className="text-muted-foreground text-xs">
-                Doors open: {format(new Date(timeSlot.doorsOpen), 'h:mm a')}
+                Doors open: {formatTime(timeSlot.doorsOpen)}
               </p>
             )}
           </div>

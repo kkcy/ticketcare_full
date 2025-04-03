@@ -1,5 +1,6 @@
 'use client';
 
+import { formatDateTime } from '@/app/util';
 import type { SerializedEvent } from '@/types';
 import {
   Activity,
@@ -50,7 +51,7 @@ export function EventSummary({ event }: EventSummaryProps) {
             <h3 className="font-semibold">Date & Time</h3>
           </div>
           <p className="mt-2 text-muted-foreground text-sm">
-            {new Date(event.startTime).toLocaleString()}
+            {formatDateTime(event.startTime)}
           </p>
         </div>
         <div className="rounded-lg border p-4">

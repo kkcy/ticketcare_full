@@ -1,3 +1,4 @@
+import { formatDate, formatTime } from '@/app/util';
 import type { PrismaNamespace } from '@repo/database';
 import {
   MultiSelector,
@@ -8,7 +9,6 @@ import {
   MultiSelectorTrigger,
 } from '@repo/design-system/components/ui/multi-select';
 import { urlSerialize } from '@repo/design-system/lib/utils';
-import { format } from 'date-fns';
 import { useMemo } from 'react';
 import useSWR from 'swr';
 
@@ -57,16 +57,6 @@ export function TimeSlotMultiSelect({
   );
 
   const timeSlotOptions = useMemo(() => {
-    // Format time for display
-    const formatTime = (time: string | Date) => {
-      return format(new Date(time), 'h:mm a');
-    };
-
-    // Format date for display
-    const formatDate = (date: string | Date) => {
-      return format(new Date(date), 'MMM d, yyyy');
-    };
-
     if (!timeSlots) {
       return [];
     }
@@ -74,7 +64,6 @@ export function TimeSlotMultiSelect({
     // Map all time slots to options with formatted labels
     return timeSlots.map((slot) => ({
       value: slot.id,
-      // value: `${formatDate(slot.eventDate.date)} | ${formatTime(slot.startTime)} - ${formatTime(slot.endTime)}`,
       label: `${formatDate(slot.eventDate.date)} | ${formatTime(slot.startTime)} - ${formatTime(slot.endTime)}`,
     }));
   }, [timeSlots]);

@@ -1,5 +1,6 @@
 'use client';
 
+import { formatTime } from '@/app/util';
 import type { SerializedEvent } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { PrismaNamespace } from '@repo/database';
@@ -25,7 +26,6 @@ import {
   useForm,
 } from '@repo/design-system/components/ui/form';
 import { toast } from '@repo/design-system/components/ui/sonner';
-import { format } from 'date-fns';
 import { useState } from 'react';
 import { z } from 'zod';
 import { createTimeSlot } from '../action';
@@ -100,11 +100,6 @@ export function TimeSlotDialog({ eventDate }: TimeSlotDialogProps) {
       setIsSubmitting(false);
     }
   }
-
-  // Format time for display
-  const formatTime = (time: string | Date) => {
-    return format(new Date(time), 'h:mm a');
-  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
