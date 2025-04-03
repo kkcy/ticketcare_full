@@ -1,6 +1,6 @@
 'use client';
 
-import type { SerializedEvent, SerializedPremiumTier } from '@/types';
+import type { SerializedEvent } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { PrismaNamespace } from '@repo/database';
 import { Button } from '@repo/design-system/components/ui/button';
@@ -27,9 +27,8 @@ import {
 import { toast } from '@repo/design-system/components/ui/sonner';
 import { Textarea } from '@repo/design-system/components/ui/textarea';
 import { title } from 'radash';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { z } from 'zod';
-import { getPremiumTiers } from './[slug]/actions';
 import { createEvent, updateEvent } from './actions';
 
 interface EventFormProps {
@@ -82,8 +81,8 @@ const eventFormSchema = z
 type EventFormValues = z.infer<typeof eventFormSchema>;
 
 export function EventForm({ setOpen, mode = 'create', event }: EventFormProps) {
-  const [premiumTiers, setPremiumTiers] = useState<SerializedPremiumTier[]>([]);
-  const [isLoadingTiers, setIsLoadingTiers] = useState(false);
+  // const [premiumTiers, setPremiumTiers] = useState<SerializedPremiumTier[]>([]);
+  // const [isLoadingTiers, setIsLoadingTiers] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Initialize form with default values or existing event data
@@ -105,30 +104,10 @@ export function EventForm({ setOpen, mode = 'create', event }: EventFormProps) {
         : undefined,
   });
 
-  // Fetch premium tiers when the form loads
-  useEffect(() => {
-    const fetchPremiumTiers = async () => {
-      setIsLoadingTiers(true);
-      try {
-        const tiers = await getPremiumTiers();
-        setPremiumTiers(tiers.filter((tier) => tier.isActive));
-      } catch (error) {
-        // Log error and show toast notification
-        toast.error(
-          `Failed to load premium tiers: ${error instanceof Error ? error.message : String(error)}`
-        );
-        toast.error('Failed to load premium tiers');
-      } finally {
-        setIsLoadingTiers(false);
-      }
-    };
-
-    fetchPremiumTiers();
-  }, []);
-
   // Handle form submission
   async function onSubmit(values: EventFormValues) {
     setIsSubmitting(true);
+
     try {
       const prismaValues = values as PrismaNamespace.EventUncheckedCreateInput;
 
@@ -159,6 +138,27 @@ export function EventForm({ setOpen, mode = 'create', event }: EventFormProps) {
       setIsSubmitting(false);
     }
   }
+
+  // // Fetch premium tiers when the form loads
+  // useEffect(() => {
+  //   const fetchPremiumTiers = async () => {
+  //     setIsLoadingTiers(true);
+  //     try {
+  //       const tiers = await getPremiumTiers();
+  //       setPremiumTiers(tiers.filter((tier) => tier.isActive));
+  //     } catch (error) {
+  //       // Log error and show toast notification
+  //       toast.error(
+  //         `Failed to load premium tiers: ${error instanceof Error ? error.message : String(error)}`
+  //       );
+  //       toast.error('Failed to load premium tiers');
+  //     } finally {
+  //       setIsLoadingTiers(false);
+  //     }
+  //   };
+
+  //   fetchPremiumTiers();
+  // }, []);
 
   return (
     <Form {...form}>
