@@ -1,12 +1,18 @@
 'use client';
 
+import { isExpired } from '@/app/[locale]/(events)/lib/utils';
+import type { SerializedEvent } from '@/app/types';
 import { Button } from '@repo/design-system/components/ui/button';
 import { useFormContext } from '@repo/design-system/components/ui/form';
 import { ArrowRight, Heart, Share2 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { TicketFormValues } from './event-pricing';
 
-export function EventFooter() {
+interface EventFooterProps {
+  event: SerializedEvent;
+}
+
+export function EventFooter({ event }: EventFooterProps) {
   const { formState, handleSubmit } = useFormContext<TicketFormValues>();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -36,20 +42,22 @@ export function EventFooter() {
           </Button>
         </div>
         <div className="flex items-center gap-4">
-          <Button
-            size="lg"
-            onClick={handleBuyTicket}
-            disabled={
-              (currentTab === 'pricing' && !formState.isValid) ||
-              formState.isLoading ||
-              formState.isSubmitting
-            }
-          >
-            {formState.isLoading || formState.isSubmitting
-              ? 'Processing...'
-              : 'Buy Ticket'}
-            <ArrowRight size={20} />
-          </Button>
+          {!isExpired(event) && (
+            <Button
+              size="lg"
+              onClick={handleBuyTicket}
+              disabled={
+                (currentTab === 'pricing' && !formState.isValid) ||
+                formState.isLoading ||
+                formState.isSubmitting
+              }
+            >
+              {formState.isLoading || formState.isSubmitting
+                ? 'Processing...'
+                : 'Buy Ticket'}
+              <ArrowRight size={20} />
+            </Button>
+          )}
         </div>
       </div>
     </div>

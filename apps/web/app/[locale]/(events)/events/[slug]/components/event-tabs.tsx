@@ -97,7 +97,7 @@ export function EventTabs({ event }: EventTabsProps) {
             <EventTerms />
           </TabsContent>
         </Tabs>
-        <EventFooter />
+        <EventFooter event={event} />
       </form>
     </FormProvider>
   );
