@@ -64,25 +64,11 @@ const eventFormSchema = z
       path: ['endTime'],
     }
   );
-// .refine(
-//   (data) => {
-//     // If it's a premium event, premium tier ID is required
-//     if (data.isPremiumEvent) {
-//       return !!data.premiumTierId;
-//     }
-//     return true;
-//   },
-//   {
-//     message: 'Premium tier is required for premium events',
-//     path: ['premiumTierId'],
-//   }
-// );
+
 // Type for form values
 type EventFormValues = z.infer<typeof eventFormSchema>;
 
 export function EventForm({ setOpen, mode = 'create', event }: EventFormProps) {
-  // const [premiumTiers, setPremiumTiers] = useState<SerializedPremiumTier[]>([]);
-  // const [isLoadingTiers, setIsLoadingTiers] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Initialize form with default values or existing event data
@@ -138,27 +124,6 @@ export function EventForm({ setOpen, mode = 'create', event }: EventFormProps) {
       setIsSubmitting(false);
     }
   }
-
-  // // Fetch premium tiers when the form loads
-  // useEffect(() => {
-  //   const fetchPremiumTiers = async () => {
-  //     setIsLoadingTiers(true);
-  //     try {
-  //       const tiers = await getPremiumTiers();
-  //       setPremiumTiers(tiers.filter((tier) => tier.isActive));
-  //     } catch (error) {
-  //       // Log error and show toast notification
-  //       toast.error(
-  //         `Failed to load premium tiers: ${error instanceof Error ? error.message : String(error)}`
-  //       );
-  //       toast.error('Failed to load premium tiers');
-  //     } finally {
-  //       setIsLoadingTiers(false);
-  //     }
-  //   };
-
-  //   fetchPremiumTiers();
-  // }, []);
 
   return (
     <Form {...form}>
@@ -287,141 +252,6 @@ export function EventForm({ setOpen, mode = 'create', event }: EventFormProps) {
               </FormItem>
             )}
           />
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {/* <FormField
-            control={form.control}
-            name="isPremiumEvent"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md p-4">
-                <FormControl>
-                  <div className="flex h-4 w-4 items-center justify-center rounded-sm border border-primary">
-                    {field.value ? <CheckIcon className="h-4 w-4" /> : null}
-                    <input
-                      type="checkbox"
-                      className="absolute h-4 w-4 cursor-pointer opacity-0"
-                      checked={field.value}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        if (!e.target.checked) {
-                          // Reset premium tier when unchecking premium event
-                          form.setValue('premiumTierId', null);
-                          form.setValue('maxTicketsPerEvent', 20);
-                        }
-                      }}
-                      onBlur={field.onBlur}
-                      name={field.name}
-                      ref={field.ref}
-                    />
-                  </div>
-                </FormControl>
-                <div className="flex-1 space-y-1 leading-none">
-                  <FormLabel>Premium Event</FormLabel>
-                  <FormDescription>
-                    Premium events allow for more ticket sales but require
-                    credits.
-                  </FormDescription>
-                </div>
-              </FormItem>
-            )}
-          /> */}
-
-          {/* {form.getValues().isPremiumEvent && (
-            <FormField
-              control={form.control}
-              name="premiumTierId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Premium Tier</FormLabel>
-                  <FormControl>
-                    <select
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:font-medium file:text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      value={field.value || ''}
-                      onChange={(e) => {
-                        const tierId = e.target.value
-                          ? Number.parseInt(e.target.value, 10)
-                          : null;
-                        field.onChange(tierId);
-
-                        // Update max tickets based on selected tier
-                        if (tierId) {
-                          const selectedTier = premiumTiers.find(
-                            (tier) => tier.id === tierId
-                          );
-                          if (selectedTier) {
-                            form.setValue(
-                              'maxTicketsPerEvent',
-                              selectedTier.maxTicketsPerEvent
-                            );
-                          }
-                        }
-                      }}
-                      disabled={isLoadingTiers}
-                    >
-                      <option value="">Select a premium tier</option>
-                      {premiumTiers.map((tier) => (
-                        <option key={tier.id} value={tier.id}>
-                          {tier.name} - {tier.maxTicketsPerEvent} tickets ($
-                          {tier.price})
-                        </option>
-                      ))}
-                    </select>
-                  </FormControl>
-                  <FormDescription>
-                    Select a premium tier to determine the maximum number of
-                    tickets.
-                    {premiumTiers.length === 0 && !isLoadingTiers && (
-                      <span className="mt-1 block text-amber-600">
-                        No premium tiers available. Contact an admin to create
-                        tiers.
-                      </span>
-                    )}
-                    {isLoadingTiers && (
-                      <span className="mt-1 block text-muted-foreground">
-                        Loading premium tiers...
-                      </span>
-                    )}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )} */}
-
-          {/* <FormField
-                control={form.control}
-                name="maxTicketsPerEvent"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Maximum Tickets</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min={1}
-                        max={1000}
-                        {...field}
-                        onChange={(e) =>
-                          field.onChange(Number.parseInt(e.target.value) || 20)
-                        }
-                        disabled={!form.getValues().isPremiumEvent}
-                        value={
-                          form.getValues().isPremiumEvent ? field.value : 20
-                        }
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Maximum number of tickets that can be sold for this event.
-                      {!form.getValues().isPremiumEvent && (
-                        <span className="mt-1 block text-amber-600">
-                          Free tier limited to 20 tickets per event.
-                        </span>
-                      )}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              /> */}
         </div>
 
         <Button type="submit" className="max-md:w-full" disabled={isSubmitting}>
