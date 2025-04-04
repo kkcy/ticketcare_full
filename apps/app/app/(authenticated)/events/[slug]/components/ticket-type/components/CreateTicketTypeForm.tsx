@@ -16,8 +16,8 @@ import { Input } from '@repo/design-system/components/ui/input';
 import { toast } from '@repo/design-system/components/ui/sonner';
 import { useState } from 'react';
 import { z } from 'zod';
-import { createTicketType } from '../../../actions';
 import { TimeSlotMultiSelect } from '../../time-slot/components/TimeSlotMultiSelect';
+import { createTicketType } from '../action';
 
 // Schema definition for the form
 export const createTicketTypeFormSchema = z.object({

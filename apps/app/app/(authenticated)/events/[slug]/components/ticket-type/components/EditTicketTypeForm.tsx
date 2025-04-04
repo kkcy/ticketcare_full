@@ -18,7 +18,7 @@ import { Input } from '@repo/design-system/components/ui/input';
 import { toast } from '@repo/design-system/components/ui/sonner';
 import { useState } from 'react';
 import { z } from 'zod';
-import { updateTicketType } from '../../../actions';
+import { updateTicketType } from '../action';
 
 // Schema definition for the form
 export const editTicketTypeFormSchema = z.object({
