@@ -6,8 +6,8 @@ import { useMemo, useState } from 'react';
 import useSWR from 'swr';
 
 interface EventAutocompleteProps {
-  value: number;
-  onChange: (value: number) => void;
+  value: string;
+  onChange: (value: string) => void;
 }
 
 type PrismaEvent = PrismaNamespace.EventGetPayload<{
@@ -33,7 +33,7 @@ export function EventAutocomplete({
 
   const eventsOptions = useMemo(() => {
     return events?.map((event) => ({
-      value: Number(event.id),
+      value: event.id,
       label: event.title,
     }));
   }, [events]);

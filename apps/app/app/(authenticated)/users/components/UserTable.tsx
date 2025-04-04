@@ -42,7 +42,7 @@ export function UserTable({
 }: UserTableProps) {
   const router = useRouter();
   const [search, setSearch] = React.useState('');
-  const [event, setEvent] = React.useState<number | null>(null);
+  const [event, setEvent] = React.useState('');
   const debouncedSearch = useDebounce(search, 500);
   const debouncedEvent = useDebounce(event, 500);
 
@@ -87,7 +87,7 @@ export function UserTable({
           className="max-w-sm"
         />
         <EventAutocomplete
-          value={event ?? 0}
+          value={event}
           onChange={(value) => setEvent(value)}
         />
       </div>

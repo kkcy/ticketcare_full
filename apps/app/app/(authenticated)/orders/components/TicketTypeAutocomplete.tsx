@@ -6,9 +6,10 @@ import { useMemo, useState } from 'react';
 import useSWR from 'swr';
 
 interface TicketTypeAutocompleteProps {
-  eventId: number;
-  value: number;
-  onChange: (value: number) => void;
+  eventId: string;
+  timeSlotId: string;
+  value: string;
+  onChange: (value: string) => void;
 }
 
 type PrismaTicketType = PrismaNamespace.TicketTypeGetPayload<{
@@ -20,6 +21,7 @@ type PrismaTicketType = PrismaNamespace.TicketTypeGetPayload<{
 
 export function TicketTypeAutocomplete({
   eventId,
+  timeSlotId,
   value,
   onChange,
   ...field
@@ -31,11 +33,17 @@ export function TicketTypeAutocomplete({
     isLoading,
   } = useSWR<{
     data: PrismaTicketType[];
-  }>(urlSerialize('/api/ticket-types', { query: debouncedQuery, eventId }));
+  }>(
+    urlSerialize('/api/ticket-types', {
+      eventId,
+      timeSlotId,
+      query: debouncedQuery,
+    })
+  );
 
   const ticketTypesOptions = useMemo(() => {
     return ticketTypes?.map((ticketType) => ({
-      value: Number(ticketType.id),
+      value: ticketType.id,
       label: ticketType.name,
     }));
   }, [ticketTypes]);
@@ -47,15 +55,17 @@ export function TicketTypeAutocomplete({
         onChange(v);
       }}
       searchValue={searchValue}
-      onSearchValueChange={setSearchValue}
+      onSearchValueChange={(v) => {
+        setSearchValue(v);
+      }}
       items={ticketTypesOptions ?? []}
       isLoading={isLoading}
       placeholder={
-        eventId ? 'Select a ticket type...' : 'Select an event first'
+        timeSlotId ? 'Select a ticket type...' : 'Select an time slot first'
       }
       emptyMessage="No ticket types found."
       className="w-full"
-      disabled={!eventId}
+      disabled={!timeSlotId}
       {...field}
     />
   );

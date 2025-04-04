@@ -6,6 +6,7 @@ export const handler = async (request: NextRequest) => {
   const searchParams = request.nextUrl.searchParams;
   const query = searchParams.get('query');
   const eventId = searchParams.get('eventId');
+  const timeSlotId = searchParams.get('timeSlotId');
 
   const ticketTypes = await database.ticketType.findMany({
     where: {
@@ -14,6 +15,11 @@ export const handler = async (request: NextRequest) => {
         mode: 'insensitive',
       },
       eventId: eventId ? eventId : undefined,
+      inventory: {
+        some: {
+          timeSlotId: timeSlotId ? timeSlotId : undefined,
+        },
+      },
     },
     select: {
       id: true,

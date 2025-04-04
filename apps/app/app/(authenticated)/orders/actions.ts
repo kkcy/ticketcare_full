@@ -10,6 +10,7 @@ import {
 import { revalidatePath } from 'next/cache';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
+import type { OrderFormValues } from './form';
 
 interface SearchOrdersParams {
   search?: string;
@@ -39,18 +40,29 @@ export async function getOrders() {
       },
       select: {
         id: true,
+        userId: true,
+        eventId: true,
         status: true,
-        paymentMethod: true,
-        orderedAt: true,
         totalAmount: true,
+        paymentMethod: true,
+        transactionId: true,
+        paymentStatus: true,
+        orderedAt: true,
+        createdAt: true,
+        updatedAt: true,
         user: {
           select: {
             firstName: true,
+            email: true,
+            phone: true,
           },
         },
+        event: true,
         tickets: {
           select: {
             id: true,
+            timeSlotId: true,
+            ticketTypeId: true,
             eventId: true,
             event: {
               select: {
@@ -201,15 +213,42 @@ export async function searchOrders({
   };
 }
 
-export async function createOrder(
-  data: PrismaNamespace.OrderUncheckedCreateInput
-) {
+export async function createOrder(data: OrderFormValues) {
+  // fetch ticket type
   const ticketType = await database.ticketType.findUnique({
     where: { id: data.ticketTypeId },
   });
-
   if (!ticketType) {
     throw new Error('Ticket type not found');
+  }
+
+  // Validate quantity against min/max per order
+  if (
+    data.quantity < ticketType.minPerOrder ||
+    data.quantity > ticketType.maxPerOrder
+  ) {
+    throw new Error(
+      `Quantity must be between ${ticketType.minPerOrder} and ${ticketType.maxPerOrder}`
+    );
+  }
+
+  // Validate time slot exists
+  const timeSlot = await database.timeSlot.findUnique({
+    where: { id: data.timeSlotId },
+  });
+  if (!timeSlot) {
+    throw new Error('Time slot not found');
+  }
+
+  // Check inventory availability
+  const inventory = await database.inventory.findFirst({
+    where: {
+      ticketTypeId: data.ticketTypeId,
+      timeSlotId: data.timeSlotId,
+    },
+  });
+  if (!inventory || inventory.quantity < data.quantity) {
+    throw new Error('Not enough tickets available for this time slot');
   }
 
   let user: Partial<
@@ -218,15 +257,18 @@ export async function createOrder(
         id: true;
         firstName: true;
         lastName: true;
+        email: true;
+        phone: true;
       };
     }>
   > | null;
 
-  if (!data.customerName || !data.customerEmail) {
-    throw new Error('Missing customer name/email');
-  }
+  if (data.userId === '-1') {
+    // if userId === '-1', create new user else get user by id
+    if (!data.customerName || !data.customerEmail) {
+      throw new Error('Missing customer name/email');
+    }
 
-  if (!data.userId) {
     const [firstName, ...lastNameParts] = data.customerName.split(' ');
     const lastName = lastNameParts.join(' ');
 
@@ -236,6 +278,8 @@ export async function createOrder(
         id: true,
         firstName: true,
         lastName: true,
+        email: true,
+        phone: true,
       },
       where: {
         email: data.customerEmail,
@@ -243,7 +287,7 @@ export async function createOrder(
     });
 
     // If no user exists, create one
-    if (!user && data.customerEmail) {
+    if (!user && data.customerEmail && data.customerName) {
       // TODO: create a user in supabase
       user = await database.user.create({
         data: {
@@ -258,6 +302,25 @@ export async function createOrder(
         },
       });
     }
+
+    if (!user) {
+      throw new Error('Failed to create user');
+    }
+  } else {
+    user = await database.user.findUnique({
+      where: { id: data.userId },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phone: true,
+      },
+    });
+
+    if (!user) {
+      throw new Error('User does not exist');
+    }
   }
 
   // Start a transaction to create order and tickets
@@ -265,55 +328,64 @@ export async function createOrder(
     // Create the order
     const order = await tx.order.create({
       data: {
-        userId: data.userId ?? user?.id ?? '', // TODO
-        status: data.status,
+        userId: user.id ?? data.userId,
+        status: 'pending',
         totalAmount: data.quantity * ticketType.price.toNumber(),
         paymentMethod: data.paymentMethod,
         transactionId: randomUUID(), // TODO
         paymentStatus: data.paymentStatus,
-        orderedAt: data.orderedAt,
+        orderedAt: new Date(),
       },
     });
 
-    // Validate quantity against min/max per order
-    if (
-      data.quantity < ticketType.minPerOrder ||
-      data.quantity > ticketType.maxPerOrder
-    ) {
-      throw new Error(
-        `Quantity must be between ${ticketType.minPerOrder} and ${ticketType.maxPerOrder}`
-      );
-    }
+    // Create tickets in bulk using createMany
+    await tx.ticket.createMany({
+      data: Array.from({ length: data.quantity }).map(() => ({
+        eventId: data.eventId,
+        ticketTypeId: data.ticketTypeId,
+        timeSlotId: data.timeSlotId,
+        orderId: order.id,
+        status: 'purchased',
+        purchaseDate: new Date(),
+        ownerName:
+          user.firstName && user.lastName
+            ? `${user.firstName} ${user.lastName}`
+            : data.customerName || '',
+        ownerEmail: user.email || data.customerEmail || '',
+        ownerPhone: user.phone || data.customerPhone || '',
+        qrCode: randomUUID(), // Generate a unique QR code
+      })),
+    });
 
-    // TODO: timeslot
-    // Create tickets
-    // const tickets = await Promise.all(
-    //   Array.from({ length: data.quantity }).map(async () => {
-    //     return tx.ticket.create({
-    //       data: {
-    //         eventId: data.eventId,
-    //         ticketTypeId: data.ticketTypeId,
-    //         orderId: order.id,
-    //         status: 'purchased',
-    //         purchaseDate: new Date(),
-    //         ownerName: data.customerName,
-    //         ownerEmail: data.customerEmail,
-    //         ownerPhone: data.customerPhone,
-    //         qrCode: randomUUID(), // Generate a unique QR code
-    //       },
-    //     })
-    //   })
-    // )
+    // Fetch the created tickets to return them
+    const createdTickets = await tx.ticket.findMany({
+      where: {
+        orderId: order.id,
+      },
+    });
 
-    return { order, tickets: [] };
+    // Update inventory quantity after creating tickets
+    await tx.inventory.update({
+      where: {
+        id: inventory.id,
+      },
+      data: {
+        quantity: {
+          decrement: data.quantity,
+        },
+      },
+    });
+
+    return { order, tickets: createdTickets };
   });
-
-  console.log(result);
 
   revalidatePath('/orders');
 
   return {
     success: true,
-    data: serializePrisma(result.order),
+    data: {
+      order: serializePrisma(result.order),
+      tickets: result.tickets.map((ticket) => serializePrisma(ticket)),
+    },
   };
 }
